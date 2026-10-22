@@ -1,672 +1,667 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistemas de Tuberías en Serie - Universidad de América</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        /* SETUP Y NORMALIZACIÓN */
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            background-color: #e2e8f0;
-            margin: 0;
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden; /* Evita el scroll para que sea una presentación real */
-            position: relative;
-            font-family: 'DM Sans', sans-serif;
-        }
-
-        p, h1, h2, h3, ul, li {
-            margin: 0;
-        }
-
-        p {
-            margin-bottom: 15px;
-        }
-
-        /* CONTENEDOR PRINCIPAL DE DIAPOSITIVA */
-        .slide-container {
-            align-items: center;
-            border-radius: 8px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-            display: none; /* Oculto por defecto */
-            flex-direction: column;
-            height: 720px;
-            justify-content: center;
-            overflow: hidden;
-            padding: 50px 60px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 1280px;
-            opacity: 0;
-            transition: opacity 0.4s ease-in-out;
-        }
-
-        .slide-container.active {
-            display: flex;
-            opacity: 1;
-        }
-
-        /* CONTROLES DE LA PRESENTACIÓN */
-        .presentation-controls {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background-color: rgba(0, 80, 136, 0.85);
-            color: #f3f0df;
-            padding: 12px 25px;
-            border-radius: 50px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            z-index: 9999;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            backdrop-filter: blur(5px);
-        }
-
-        .presentation-controls button {
-            background: none;
-            border: none;
-            color: #11caa0;
-            font-size: 24px;
-            cursor: pointer;
-            transition: transform 0.2s, color 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .presentation-controls button:hover {
-            transform: scale(1.2);
-            color: #fff;
-        }
-
-        .presentation-controls .counter {
-            font-family: 'DM Sans', sans-serif;
-            font-weight: 700;
-            font-size: 18px;
-        }
-
-        /* FORMAS DE FONDO (DISEÑO ABSTRACTO) */
-        .bg-shape {
-            border-radius: 50%;
-            opacity: 0.1;
-            position: absolute;
-            z-index: 0;
-        }
-
-        .dark-bg .bg-shape-1 { background: #11caa0; height: 500px; left: -150px; top: -150px; width: 500px; }
-        .dark-bg .bg-shape-2 { background: #f3f0df; bottom: -200px; filter: blur(50px); height: 600px; right: -200px; width: 600px; }
-        
-        .light-bg .bg-shape-1 { background: #005088; height: 500px; opacity: 0.05; right: -100px; top: -200px; width: 500px; }
-        .light-bg .bg-shape-2 { background: #11caa0; bottom: -150px; filter: blur(30px); height: 400px; left: -100px; opacity: 0.05; width: 400px; }
-
-        /* ASEGURAR QUE EL CONTENIDO ESTÉ SOBRE EL FONDO */
-        .slide-container > *:not(.bg-shape) {
-            position: relative;
-            z-index: 1;
-        }
-
-        /* TIPOGRAFÍA Y COLORES DEL TEMA */
-        .slide-container h1, .slide-container h2, .slide-container h3, .slide-container th {
-            font-family: 'Merriweather', serif;
-            font-weight: 700;
-        }
-
-        .slide-container p, .slide-container li, .slide-container td, .slide-container .subtitle {
-            font-family: 'DM Sans', sans-serif;
-            font-weight: 400;
-            font-size: 20px;
-            line-height: 1.5;
-        }
-
-        .dark-bg { background-color: #005088; }
-        .dark-bg h1, .dark-bg h2, .dark-bg p, .dark-bg .subtitle { color: #f3f0df; }
-        .dark-bg .accent { color: #11caa0; }
-
-        .light-bg { background-color: #f3f0df; }
-        .light-bg h2, .light-bg h3 { color: #005088; }
-        .light-bg p, .light-bg li, .light-bg td { color: #121212; }
-
-        /* ESTILOS DE TÍTULOS GLOBALES */
-        .slide-title {
-            font-size: 44px;
-            margin-bottom: 40px;
-            text-align: left;
-            width: 100%;
-        }
-
-        .content-area {
-            align-items: center;
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-            justify-content: center;
-            width: 100%;
-        }
-
-        /* LAYOUTS ESPECÍFICOS */
-        
-        /* 1. Title Layout */
-        .title-layout { text-align: center; max-width: 1000px; }
-        .title-layout h1 { font-size: 70px; letter-spacing: 1px; line-height: 1.1; margin-bottom: 25px; text-transform: uppercase; }
-        .title-layout .subtitle { color: #11caa0; font-size: 32px; font-weight: 500; }
-
-        /* 2. Section Title */
-        .section-title-layout { text-align: center; max-width: 900px; }
-        .section-title-layout hr { background-color: #11caa0; border: none; height: 5px; margin: 0 auto 30px; width: 100px; }
-        .section-title-layout h2 { font-size: 60px; margin-bottom: 25px; }
-        .section-title-layout p { font-size: 24px; }
-
-        /* 3. Two Column & Image Right */
-        .two-column { display: grid; gap: 40px; grid-template-columns: 1fr 1fr; width: 100%; align-items: center; }
-        .two-column .text-column { padding-right: 20px; }
-        .image-wrapper { border-radius: 12px; border: 2px solid #005088; height: 420px; overflow: hidden; width: 100%; background-color: #fff; display: flex; align-items: center; justify-content: center;}
-        .image-wrapper img { height: 100%; object-fit: contain; width: 100%; }
-        
-        .text-column h3 { font-size: 28px; margin-bottom: 15px; margin-top: 25px; color: #005088;}
-        .text-column h3:first-child { margin-top: 0; }
-        
-        /* 4. Tiled Layout */
-        .tiled-content { display: flex; gap: 30px; width: 100%; align-items: stretch; }
-        .tile { align-items: center; background-color: #005088; border-radius: 12px; display: flex; flex-direction: column; flex: 1; padding: 40px 30px; text-align: center; }
-        .tile .icon { color: #11caa0; font-size: 56px; margin-bottom: 25px; }
-        .tile h3 { color: #f3f0df; font-size: 26px; margin-bottom: 15px; }
-        .tile p { color: #f3f0df; font-size: 18px; margin: 0; }
-
-        /* 5. Table Layout */
-        .table-layout { width: 100%; }
-        .table-layout table { background: #fff; border-collapse: collapse; border-radius: 8px; border: 1px solid #cdd6e2; overflow: hidden; width: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .table-layout th, .table-layout td { border-bottom: 1px solid #cdd6e2; font-size: 22px; padding: 22px 24px; text-align: left; }
-        .table-layout th { background-color: #005088; color: #f3f0df; font-size: 24px; }
-        .table-layout tr:last-child td { border-bottom: none; }
-
-        /* 6. Styled Bullets */
-        .bullet-list { max-width: 1000px; width: 100%; }
-        .bullet-list ul { list-style: none; margin: 0; padding: 0; }
-        .bullet-list li { font-size: 22px; margin-bottom: 30px; padding-left: 50px; position: relative; }
-        .bullet-list li > i { color: #11caa0; font-size: 30px; left: 0; position: absolute; top: 2px; }
-        .bullet-list li strong { color: #005088; }
-
-        /* 7. Q&A Layout */
-        .qa-layout { text-align: center; max-width: 800px;}
-        .qa-layout h2 { font-size: 70px; margin-bottom: 40px; }
-        .qa-layout p { font-size: 26px; margin-bottom: 20px; }
-        .qa-layout .contact-info { color: #11caa0; font-size: 28px; font-weight: 700; margin-top: 50px; }
-
-        /* MATH CONTAINER */
-        .formula-container {
-            background: #fff;
-            border-radius: 8px;
-            border: 1px solid #005088;
-            margin: 20px 0;
-            padding: 15px;
-            text-align: center;
-        }
-        
-        .inline-math {
-            font-weight: 700;
-            color: #005088;
-        }
-
-        /* CORRECCIÓN: Contraste de matemáticas en fondos oscuros */
-        .tile .inline-math {
-            color: #11caa0;
-            font-size: 24px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistemas de tuberías en serie · Mecánica de Fluidos · Universidad de América</title>
+<meta name="description" content="Presentación de clase: sistemas de tuberías en serie (Clase I, II y III) con práctica guiada en la calculadora Hidráulica de Tuberías en Serie v2.0.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+/* ================= BASE ================= */
+*{box-sizing:border-box}
+:root{--s:1;--azul:#005088;--crema:#f3f0df;--verde:#11caa0;--tinta:#121212;--rojo:#c0392b;--ambar:#b7791f}
+body{background:#dbe4ee;margin:0;height:100vh;width:100vw;overflow:hidden;position:relative;font-family:'DM Sans',system-ui,sans-serif;color:var(--tinta)}
+p,h1,h2,h3,h4,ul,li,figure{margin:0} p{margin-bottom:12px}
+a{color:var(--azul)}
+.slide-container{align-items:center;border-radius:10px;box-shadow:0 12px 28px rgba(0,0,0,.18);display:none;flex-direction:column;height:720px;justify-content:center;overflow:hidden;padding:40px 54px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(var(--s));transform-origin:center;width:1280px;opacity:0;transition:opacity .35s ease}
+.slide-container.active{display:flex;opacity:1}
+.bg-shape{border-radius:50%;opacity:.1;position:absolute;z-index:0;pointer-events:none}
+.dark-bg .bg-shape-1{background:var(--verde);height:500px;left:-150px;top:-150px;width:500px}
+.dark-bg .bg-shape-2{background:var(--crema);bottom:-200px;filter:blur(50px);height:600px;right:-200px;width:600px}
+.light-bg .bg-shape-1{background:var(--azul);height:500px;opacity:.05;right:-100px;top:-200px;width:500px}
+.light-bg .bg-shape-2{background:var(--verde);bottom:-150px;filter:blur(30px);height:400px;left:-100px;opacity:.05;width:400px}
+.slide-container>*:not(.bg-shape){position:relative;z-index:1}
+.slide-container h1,.slide-container h2,.slide-container h3,.slide-container th{font-family:'Merriweather',Georgia,serif;font-weight:700}
+.slide-container p,.slide-container li,.slide-container td{font-size:19px;line-height:1.45}
+.dark-bg{background-color:var(--azul)} .dark-bg h1,.dark-bg h2,.dark-bg h3,.dark-bg p,.dark-bg li{color:var(--crema)} .dark-bg .accent{color:var(--verde)}
+.light-bg{background-color:var(--crema)} .light-bg h2,.light-bg h3,.light-bg h4{color:var(--azul)}
+.slide-title{font-size:37px;line-height:1.15;margin-bottom:22px;text-align:left;width:100%}
+.slide-kicker{font-size:14px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#0b8f70;width:100%;margin-bottom:6px}
+.dark-bg .slide-kicker{color:var(--verde)}
+.content-area{align-items:center;display:flex;flex-direction:column;flex-grow:1;justify-content:center;width:100%;min-height:0}
+.notes{display:none}
+/* ================= CONTROLES ================= */
+#progress{position:fixed;top:0;left:0;height:5px;background:var(--verde);z-index:10000;transition:width .3s}
+.presentation-controls{position:fixed;bottom:22px;right:22px;background:rgba(0,80,136,.92);color:var(--crema);padding:10px 16px;border-radius:50px;display:flex;align-items:center;gap:10px;z-index:9999;box-shadow:0 4px 14px rgba(0,0,0,.25);backdrop-filter:blur(5px)}
+.presentation-controls button{background:none;border:none;color:var(--verde);font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%}
+.presentation-controls button:hover{background:rgba(255,255,255,.14);color:#fff}
+.presentation-controls .counter{font-weight:700;font-size:15px;min-width:58px;text-align:center}
+#notesPanel{position:fixed;left:22px;bottom:22px;max-width:520px;background:#10233a;color:#e8eef6;border:1px solid #2b4a6e;border-radius:12px;padding:16px 18px;z-index:9998;display:none;box-shadow:0 10px 30px rgba(0,0,0,.35);font-size:14px;line-height:1.5}
+#notesPanel.show{display:block} #notesPanel b{color:var(--verde)}
+#overview{position:fixed;inset:0;background:rgba(8,25,44,.96);z-index:10001;display:none;padding:38px;overflow:auto}
+#overview.show{display:block} #overview h3{color:var(--crema);font-family:'Merriweather',serif;margin-bottom:18px}
+.ov-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:1100px}
+.ov-grid button{text-align:left;background:#14365a;color:#eaf2fb;border:1px solid #2b5a8c;border-radius:10px;padding:12px 14px;cursor:pointer;font-family:inherit;font-size:15px}
+.ov-grid button:hover{background:#1a4a78} .ov-grid button.cur{border-color:var(--verde);color:#fff}
+/* ================= LAYOUTS ================= */
+.title-layout{text-align:center;max-width:1020px}
+.title-layout h1{font-size:62px;letter-spacing:.5px;line-height:1.08;margin-bottom:18px;text-transform:uppercase}
+.section-title-layout{text-align:center;max-width:950px}
+.section-title-layout hr{background:var(--verde);border:none;height:5px;margin:0 auto 26px;width:100px}
+.section-title-layout h2{font-size:54px;margin-bottom:22px}.section-title-layout p{font-size:21px}
+.two-column{display:grid;gap:34px;grid-template-columns:1fr 1fr;width:100%;align-items:center}
+.two-column.wide-left{grid-template-columns:1.18fr .82fr}.two-column.wide-right{grid-template-columns:.85fr 1.15fr}
+.image-wrapper{border-radius:12px;border:2px solid var(--azul);height:400px;overflow:hidden;width:100%;background:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.image-wrapper img{height:100%;object-fit:cover;width:100%}
+figcaption,.figcap{font-size:12.5px;color:#445;padding:6px 10px;text-align:center;background:#fff;width:100%}
+.text-column h3{font-size:25px;margin:18px 0 8px}.text-column h3:first-child{margin-top:0}
+.tiled-content{display:flex;gap:24px;width:100%;align-items:stretch}
+.tile{align-items:center;background:var(--azul);border-radius:12px;display:flex;flex-direction:column;flex:1;padding:30px 24px;text-align:center}
+.tile .icon{color:var(--verde);font-size:46px;margin-bottom:16px}.tile h3{color:var(--crema);font-size:23px;margin-bottom:10px}.tile p,.tile li{color:var(--crema);font-size:16.5px}
+.table-layout{width:100%}
+table.data{background:#fff;border-collapse:collapse;border-radius:8px;border:1px solid #cdd6e2;overflow:hidden;width:100%;box-shadow:0 4px 6px rgba(0,0,0,.05)}
+table.data th,table.data td{border-bottom:1px solid #dde5ee;font-size:17px;padding:11px 13px;text-align:left;vertical-align:top}
+table.data th{background:var(--azul);color:var(--crema);font-size:17px}
+table.data tr:last-child td{border-bottom:none}
+table.data td.num,table.data th.num{text-align:right;font-variant-numeric:tabular-nums}
+table.mini th,table.mini td{font-size:14.5px;padding:7px 9px;line-height:1.3}
+.bullet-list{max-width:1020px;width:100%}
+.bullet-list ul{list-style:none;padding:0}
+.bullet-list>ul>li{font-size:19px;margin-bottom:18px;padding-left:46px;position:relative}
+.bullet-list li>i:first-child{color:#0b8f70;font-size:26px;left:0;position:absolute;top:2px}
+.bullet-list li strong{color:var(--azul)}
+ul.tight{list-style:none;padding:0} ul.tight li{margin-bottom:7px;font-size:16.5px}
+ul.check{list-style:none;padding:0} ul.check li{margin-bottom:9px;font-size:17px;padding-left:30px;position:relative}
+ul.check li::before{content:"✓";position:absolute;left:0;color:#0b8f70;font-weight:900}
+ol.steps{padding-left:22px} ol.steps li{margin-bottom:8px;font-size:16.5px}
+/* ================= MATEMÁTICAS (HTML, sin dependencias) ================= */
+.v{font-style:italic;font-family:'Merriweather',Georgia,serif}
+.frac{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;margin:0 .12em;line-height:1.15}
+.frac>span:first-child{border-bottom:2px solid currentColor;padding:0 .28em .05em}.frac>span:last-child{padding:.05em .28em 0}
+.eq{background:#fff;border:1px solid var(--azul);border-radius:8px;padding:12px 14px;text-align:center;font-size:19px;color:var(--azul);margin:10px 0;font-family:'Merriweather',Georgia,serif}
+.eq small{display:block;font-family:'DM Sans',sans-serif;font-size:12.5px;color:#556;margin-top:6px}
+.mono{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.92em;background:#e8eef3;border-radius:4px;padding:1px 5px;color:#073d63;white-space:nowrap}
+.dark-bg .mono{background:rgba(255,255,255,.15);color:#dff7ef}
+/* ================= COMPONENTES APP ================= */
+.chip{display:inline-flex;align-items:center;gap:7px;background:var(--azul);color:#fff;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700;letter-spacing:.03em}
+.chip i{color:var(--verde)}
+.app-btn{display:inline-flex;align-items:center;gap:10px;background:var(--azul);color:var(--crema)!important;padding:12px 20px;text-decoration:none;border-radius:9px;font-weight:700;font-size:17px;box-shadow:0 4px 10px rgba(0,80,136,.3)}
+.app-btn:hover{background:#0068b3}.app-btn.small{padding:8px 13px;font-size:14px}
+.callout{border-radius:9px;padding:13px 16px;font-size:16px;line-height:1.4;margin-top:12px}
+.callout p,.callout li{font-size:16px;margin:0}
+.callout.warn{background:#fff3d6;border-left:6px solid #e0a800;color:#5c4400}
+.callout.bad{background:#fde8e5;border-left:6px solid var(--rojo);color:#641e16}
+.callout.good{background:#e2f5ee;border-left:6px solid #0b8f70;color:#063f30}
+.callout.info{background:#e5effa;border-left:6px solid var(--azul);color:#073d63}
+.dense p,.dense li,.dense td{font-size:15.5px;line-height:1.35}
+.dense .slide-title{margin-bottom:12px}
+.panel{background:#fff;border:1px solid #c9d6e4;border-radius:11px;padding:15px 17px;box-shadow:0 3px 8px rgba(0,0,0,.05)}
+.panel h4{font-size:16px;margin-bottom:8px}
+.panel.dark{background:#10233a;border-color:#10233a;color:#eaf2fb}.panel.dark h4{color:var(--verde)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0}
+.kpi{background:var(--azul);border-radius:10px;padding:11px 12px;text-align:center}
+.kpi .val{color:#fff;font-weight:900;font-size:21px;line-height:1.1}.kpi .lab{color:#bfe6d8;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
+.kpi.light{background:#fff;border:2px solid var(--verde)} .kpi.light .val{color:var(--azul)} .kpi.light .lab{color:#456}
+.qrbox{background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 8px 22px rgba(0,0,0,.18)}
+.qrbox svg{width:190px;height:190px;display:block;margin:0 auto}
+.qrbox.small svg{width:128px;height:128px}
+.qrbox .url{font-size:13px;font-weight:700;color:var(--azul);word-break:break-all;margin-top:8px}
+.serie-diagram{display:flex;align-items:center;gap:0;width:100%;margin:14px 0}
+.tank{background:#dff1fa;border:2px solid var(--azul);border-radius:10px;padding:14px 10px;text-align:center;font-weight:700;color:var(--azul);min-width:118px;font-size:15px}
+.pipeA,.pipeB{flex:1;text-align:center;color:#fff;font-weight:700;font-size:14.5px;padding:12px 6px;position:relative}
+.pipeA{background:#2e86c9}.pipeB{background:#0b8f70}
+.pipeA small,.pipeB small{display:block;font-weight:400;font-size:12.5px;opacity:.92}
+.answer{position:relative}
+.answer .ans-body{filter:blur(8px);opacity:.32;pointer-events:none;transition:filter .3s,opacity .3s;user-select:none}
+.answer.shown .ans-body{filter:none;opacity:1;pointer-events:auto;user-select:auto}
+.reveal-btn{position:absolute;top:10px;right:10px;z-index:3;background:var(--azul);color:#fff;border:none;border-radius:999px;padding:7px 13px;font-family:inherit;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.25)}
+.answer.shown .reveal-btn{background:#fff;color:var(--azul);border:1px solid var(--azul)}
+.tag-ok{color:#087a57;font-weight:900}.tag-no{color:var(--rojo);font-weight:900}.tag-warn{color:var(--ambar);font-weight:900}
+.foot{width:100%;font-size:12.5px;color:#667;margin-top:10px;padding-right:340px}
+.dark-bg .foot{color:#c9d9e6}
+.qa-layout{text-align:center;max-width:900px}.qa-layout h2{font-size:58px;margin-bottom:30px}.qa-layout p{font-size:21px;text-align:left;margin-bottom:16px}
+@media print{
+ @page{size:landscape;margin:8mm}
+ body{overflow:visible;height:auto;width:auto;background:#fff}
+ #progress,.presentation-controls,#notesPanel,#overview,.reveal-btn{display:none!important}
+ .slide-container{display:flex!important;opacity:1!important;position:relative;top:auto;left:auto;transform:none;margin:0 auto 8mm;zoom:.70;page-break-after:always;box-shadow:none;border:1px solid #bbb}
+ .answer .ans-body{filter:none!important;opacity:1!important}
+}
+</style>
 </head>
 <body>
+<div id="progress"></div>
 
-<!-- SLIDE 1: Título -->
-<div class="slide-container dark-bg" id="slide1">
-    <div class="bg-shape bg-shape-1"></div>
-    <div class="bg-shape bg-shape-2"></div>
-    <div class="title-layout">
-        <h2 style="font-size: 32px; color: #11caa0; font-family: 'DM Sans', sans-serif; margin-bottom: 15px;">Universidad de América</h2>
-        <h2 style="font-size: 28px; color: #f3f0df; font-family: 'DM Sans', sans-serif; margin-bottom: 25px;">Curso de Mecánica de Fluidos</h2>
-        <h1 style="font-size: 65px;">Sistemas de tuberías en serie</h1>
-        <p class="subtitle" style="font-size: 28px; color: #f3f0df; margin-bottom: 10px; margin-top: 25px;">Docente: Ph.D. Juan Sandoval Herrera</p>
-        <p style="font-size: 24px; color: #11caa0; margin-top: 20px;">Año 2026</p>
-    </div>
+<!-- QR reutilizable (app del curso) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><symbol id="qrApp" viewBox="0 0 37 37"><!--QR_RECTS--></symbol></defs></svg>
+
+<!-- ============ 1 · PORTADA ============ -->
+<div class="slide-container dark-bg" data-title="1 · Portada">
+ <div class="bg-shape bg-shape-1"></div><div class="bg-shape bg-shape-2"></div>
+ <div style="display:grid;grid-template-columns:1fr 230px;gap:36px;align-items:center;max-width:1080px">
+  <div class="title-layout" style="text-align:left">
+   <h2 style="font-size:27px;color:var(--verde);font-family:'DM Sans',sans-serif;margin-bottom:8px">Universidad de América</h2>
+   <h2 style="font-size:23px;font-family:'DM Sans',sans-serif;margin-bottom:20px">Curso de Mecánica de Fluidos</h2>
+   <h1>Sistemas de tuberías en serie</h1>
+   <p style="font-size:21px;margin-bottom:8px">Docente: Ph.D. Juan Sandoval Herrera</p>
+   <p style="font-size:18px;color:var(--verde)">Clase del 22 de octubre de 2026 · Clase I, II y III con calculadora</p>
+   <div class="callout info" style="background:rgba(255,255,255,.12);border-left-color:var(--verde);color:#eef6ff;max-width:720px">
+    <p><strong>Hoy trabajamos con el celular o el portátil abierto.</strong> Escanee el QR ahora y deje la calculadora lista en una pestaña: cada ejemplo y cada práctica se digitan en la app.</p>
+   </div>
+  </div>
+  <div class="qrbox small"><svg viewBox="0 0 37 37" aria-label="QR calculadora"><use href="#qrApp"/></svg><div class="url">juansanher25.github.io/tuberiasybombas</div></div>
+ </div>
+ <aside class="notes"><b>Notas del docente (tecla N):</b> pida abrir la app ANTES de la teoría. Verifique en voz alta: panel lateral = Agua (20 °C), p<sub>atm</sub>=101.325 kPa. Avise que en Bogotá ese valor cambiará solo en la actividad final. La app es SPA: no hay enlace directo por módulo; siempre se entra por Inicio → menú lateral.</aside>
 </div>
 
-<!-- SLIDE 2: Introducción -->
-<div class="slide-container light-bg" id="slide2">
-    <div class="bg-shape bg-shape-1"></div>
-    <div class="bg-shape bg-shape-2"></div>
-    <div class="section-title-layout">
-        <hr>
-        <h2>Fundamentos y Principios</h2>
-        <p>El diseño de tuberías en serie se fundamenta en la conservación de masa y energía. Comprender cómo la fricción reduce la presión, limita el caudal o exige mayores diámetros es esencial para todo ingeniero de procesos o diseño. Su importancia es fundamental en ingeniería hidráulica, mecánica, civil y química para plantas de procesos, especialmente, pero también para diseño de circuitos de fluidos, como en los vehículos.</p>
-    </div>
+<!-- ============ 2 · RUTA DE HOY ============ -->
+<div class="slide-container light-bg" data-title="2 · Ruta y objetivos de hoy">
+ <div class="bg-shape bg-shape-1"></div><div class="bg-shape bg-shape-2"></div>
+ <div class="slide-kicker">Sesión de hoy · Qué va a lograr y cómo</div>
+ <h2 class="slide-title">Ruta de la sesión: a mano para entender, con la app para resolver</h2>
+ <div class="content-area"><div class="two-column wide-left" style="align-items:stretch">
+  <div class="panel">
+   <h4>Al cerrar la clase usted podrá…</h4>
+   <ul class="check">
+    <li>Plantear la ecuación de energía <strong>por tramos en serie</strong> y explicar dónde se pierde cada metro de carga.</li>
+    <li>Obtener <span class="v">f</span> con Moody/Colebrook–White y el <span class="v">K</span> de accesorios con el método <span class="v">L<sub>e</sub>/D</span> de Crane.</li>
+    <li>Resolver <strong>Clase I (potencia), II (caudal) y III (diámetro)</strong> en los Módulos 01–03, y auditar velocidades y NPSH.</li>
+    <li>Detectar un resultado absurdo sin mirar la respuesta: cierre del balance, orden de magnitud y rangos de velocidad.</li>
+   </ul>
+  </div>
+  <div class="panel dark">
+   <h4>Agenda sugerida (≈110 min)</h4>
+   <ol class="steps" style="color:#eaf2fb">
+    <li>Fundamento + 3 ejemplos guiados <em>digitados conmigo</em> — 35 min</li>
+    <li>Protocolo anti-errores de la app — 10 min</li>
+    <li>Prácticas en parejas: <strong>A obligatoria</strong> + B o C — 35 min</li>
+    <li>Actividad final por equipos (caso Bogotá) — 25 min</li>
+    <li>Cierre y cuestionario rápido — 5 min</li>
+   </ol>
+   <p style="font-size:14.5px;color:#bfe6d8;margin-top:10px">La práctica no trabajada en clase queda como tarea con la misma app y la misma tabla de digitación.</p>
+  </div>
+ </div></div>
+ <aside class="notes"><b>Tiempo:</b> si la sesión es de 60–80 min, haga en clase Guiados + Práctica A + Fases 1–2 de la actividad final; deje B/C y la Fase 3 como entrega. Tecla <b>O</b> = índice para saltar diapositivas.</aside>
 </div>
 
-<!-- SLIDE 3: Ecuaciones Teóricas (Image Right) -->
-<div class="slide-container light-bg" id="slide3">
-    <div class="bg-shape bg-shape-1"></div>
-    <div class="bg-shape bg-shape-2"></div>
-    <h2 class="slide-title">Ecuaciones Fundamentales</h2>
-    <div class="content-area">
-        <div class="two-column">
-            <div class="text-column">
-                <p>El análisis parte de la Ecuación de la Energía (O ecuación de Bernoulli Generalizada):</p>
-                <div class="formula-container">
-                    <math style="display: math; font-size: 22px;" xmlns="http://www.w3.org/1998/Math/MathML">
-                        <mfrac><msub><mi>P</mi><mn>1</mn></msub><mi>γ</mi></mfrac>
-                        <mo>+</mo><msub><mi>z</mi><mn>1</mn></msub><mo>+</mo>
-                        <mfrac><msubsup><mi>v</mi><mn>1</mn><mn>2</mn></msubsup><mrow><mn>2</mn><mi>g</mi></mrow></mfrac>
-                        <mo>+</mo><msub><mi>h</mi><mi>A</mi></msub><mo>-</mo><msub><mi>h</mi><mi>R</mi></msub><mo>-</mo><msub><mi>h</mi><mi>L</mi></msub>
-                        <mo>=</mo>
-                        <mfrac><msub><mi>P</mi><mn>2</mn></msub><mi>γ</mi></mfrac>
-                        <mo>+</mo><msub><mi>z</mi><mn>2</mn></msub><mo>+</mo>
-                        <mfrac><msubsup><mi>v</mi><mn>2</mn><mn>2</mn></msubsup><mrow><mn>2</mn><mi>g</mi></mrow></mfrac>
-                    </math>
-                </div>
-                <p>Las pérdidas totales se calculan sumando la pérdida por fricción (Darcy-Weisbach) y las pérdidas secundarias, o debidas a los accesorios:</p>
-                <div class="formula-container">
-                    <math style="display: math; font-size: 22px;" xmlns="http://www.w3.org/1998/Math/MathML">
-                        <msub><mi>h</mi><mi>L</mi></msub><mo>=</mo>
-                        <mi>f</mi><mo>·</mo><mfenced><mfrac><mi>L</mi><mi>D</mi></mfrac></mfenced><mo>·</mo><mfenced><mfrac><msup><mi>v</mi><mn>2</mn></msup><mrow><mn>2</mn><mi>g</mi></mrow></mfrac></mfenced>
-                        <mo>+</mo>
-                        <mo>∑</mo><mi>K</mi><mo>·</mo><mfenced><mfrac><msup><mi>v</mi><mn>2</mn></msup><mrow><mn>2</mn><mi>g</mi></mrow></mfrac></mfenced>
-                    </math>
-                </div>
-            </div>
-            <div class="image-wrapper">
-                <img src="https://github.com/Juansanher25/Sistemastuberiasserie/blob/main/Moody_diagram.jpg?raw=true" alt="Diagrama de Moody para factor de fricción" style="width:100%; height:100%; object-fit:cover;" />
-            </div>
-        </div>
-    </div>
+<!-- ============ 3 · FUNDAMENTOS ============ -->
+<div class="slide-container light-bg" data-title="3 · Fundamentos">
+ <div class="bg-shape bg-shape-1"></div><div class="bg-shape bg-shape-2"></div>
+ <div class="section-title-layout"><hr><h2>Fundamentos y principios</h2>
+ <p>Todo sistema en serie obedece a <strong>conservación de masa y de energía</strong>: el mismo caudal atraviesa cada tramo y la fricción va «consumiendo» carga a lo largo del recorrido. Entender ese consumo —y no solo calcular un número— es lo que permite decidir diámetros, bombas y costos de operación en plantas de proceso, acueductos y circuitos de máquinas y vehículos.</p>
+ <p style="font-size:18px"><span class="chip"><i class="fa-solid fa-scale-balanced"></i> Masa: Q constante</span>&nbsp; <span class="chip"><i class="fa-solid fa-bolt"></i> Energía: Σh<sub>L</sub> se suma</span>&nbsp; <span class="chip"><i class="fa-solid fa-gauge-high"></i> Si D baja, V y h<sub>L</sub> se disparan</span></p>
+ </div>
 </div>
 
-<!-- SLIDE 4: Clasificación (Tabla) -->
-<div class="slide-container light-bg" id="slide4">
-    <div class="bg-shape bg-shape-1"></div>
-    <div class="bg-shape bg-shape-2"></div>
-    <h2 class="slide-title">Clasificación de Problemas en Serie</h2>
-    <div class="content-area">
-        <div class="table-layout">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Categoría</th>
-                        <th>Datos Conocidos por el Ingeniero</th>
-                        <th>Incógnita a Resolver</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>Clase I</strong></td>
-                        <td>Geometría (<math style="display: math;" class="inline-math"><mi>L</mi><mo>,</mo><mi>D</mi></math>), Fluido, Caudal (<math style="display: math;" class="inline-math"><mi>Q</mi></math>)</td>
-                        <td>Pérdida (<math style="display: math;" class="inline-math"><msub><mi>h</mi><mi>L</mi></msub></math>), <math style="display: math;" class="inline-math"><mi>Δ</mi><mi>P</mi></math> o Potencia de Bomba (<math style="display: math;" class="inline-math"><mi>P</mi></math>)</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Clase II</strong></td>
-                        <td>Geometría (<math style="display: math;" class="inline-math"><mi>L</mi><mo>,</mo><mi>D</mi></math>), Fluido, Pérdida Máxima (<math style="display: math;" class="inline-math"><msub><mi>h</mi><mi>L</mi></msub></math>)</td>
-                        <td>Caudal Transferido (<math style="display: math;" class="inline-math"><mi>Q</mi></math>) o Velocidad (<math style="display: math;" class="inline-math"><mi>v</mi></math>)</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Clase III</strong></td>
-                        <td>Longitud (<math style="display: math;" class="inline-math"><mi>L</mi></math>), Fluido, Pérdida (<math style="display: math;" class="inline-math"><msub><mi>h</mi><mi>L</mi></msub></math>), Caudal (<math style="display: math;" class="inline-math"><mi>Q</mi></math>)</td>
-                        <td>Diámetro de Tubería (<math style="display: math;" class="inline-math"><mi>D</mi></math>)</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+<!-- ============ 4 · ECUACIONES ============ -->
+<div class="slide-container light-bg dense" data-title="4 · Ecuaciones implementadas">
+ <div class="bg-shape bg-shape-1"></div><div class="bg-shape bg-shape-2"></div>
+ <div class="slide-kicker">Las mismas ecuaciones en el tablero y en la app v2.0</div>
+ <h2 class="slide-title">Ecuaciones fundamentales (así las resuelve la calculadora)</h2>
+ <div class="content-area"><div class="two-column wide-left">
+  <div>
+   <p style="margin-bottom:4px"><strong>1 · Energía entre 1 y 2</strong> (con tanques, velocidades superficiales ≈ 0 y α = 1):</p>
+   <div class="eq"><span class="frac"><span><span class="v">p</span><sub>1</sub></span><span>γ</span></span> + <span class="v">z</span><sub>1</sub> + <span class="frac"><span><span class="v">v</span><sub>1</sub><sup>2</sup></span><span>2<span class="v">g</span></span></span> + <span class="v">h<sub>A</sub></span> − <span class="v">h<sub>R</sub></span> − Σ<span class="v">h<sub>L</sub></span> = <span class="frac"><span><span class="v">p</span><sub>2</sub></span><span>γ</span></span> + <span class="v">z</span><sub>2</sub> + <span class="frac"><span><span class="v">v</span><sub>2</sub><sup>2</sup></span><span>2<span class="v">g</span></span></span><small>h<sub>A</sub> = bomba · h<sub>R</sub> = turbina · en esta clase h<sub>R</sub> = 0</small></div>
+   <p style="margin-bottom:4px"><strong>2 · Pérdidas por tramo</strong> — Darcy–Weisbach + locales (Crane TP-410):</p>
+   <div class="eq"><span class="v">h<sub>L</sub></span> = <span class="v">f</span>·<span class="frac"><span><span class="v">L</span></span><span><span class="v">D</span></span></span>·<span class="frac"><span><span class="v">v</span><sup>2</sup></span><span>2<span class="v">g</span></span></span> + Σ<span class="v">K</span>·<span class="frac"><span><span class="v">v</span><sup>2</sup></span><span>2<span class="v">g</span></span></span> ,&nbsp; <span class="v">K</span> = <span class="v">K</span><sub>directo</sub> + (<span class="v">L<sub>e</sub>/D</span>)·<span class="v">f<sub>T</sub></span><small>f<sub>T</sub> = 0,25·[log<sub>10</sub>(ε/3,7D)]<sup>−2</sup> · Re = vDρ/μ · laminar f = 64/Re · turbulento: Colebrook–White por Newton–Raphson</small></div>
+  </div>
+  <figure class="image-wrapper" style="height:430px"><img src="https://github.com/Juansanher25/Sistemastuberiasserie/blob/main/Moody_diagram.jpg?raw=true" alt="Diagrama de Moody" loading="eager" referrerpolicy="no-referrer" style="object-fit:contain;background:#fff"><figcaption class="figcap">Moody para estimar a mano. En la app: <strong>Datos técnicos → Ábaco de Moody calculado</strong> con Colebrook–White (ubique su punto Re, ε/D).</figcaption></figure>
+ </div></div>
+ <aside class="notes"><b>Énfasis:</b> en la versión anterior de estas diapositivas el método de accesorios quedaba como «ΣK» genérico. Ahora se nombra el método real de la app (Le/D × f<sub>T</sub>), porque los estudiantes deben escoger accesorios por su nombre exacto en la lista, no digitar un K inventado.</aside>
 </div>
 
-<!-- SLIDE 5: Clase 1 Teoría (Tiled) -->
-<div class="slide-container light-bg" id="slide5">
-    <div class="bg-shape bg-shape-1"></div>
-    <div class="bg-shape bg-shape-2"></div>
-    <h2 class="slide-title">Clase I: Cálculo de Pérdidas de Energía y Potencia</h2>
-    <div class="content-area">
-        <div class="tiled-content">
-            <div class="tile">
-                <div class="icon"><i class="fa-solid fa-gauge-high"></i></div>
-                <h3>1. Cinemática</h3>
-                <p>Calcular directamente la velocidad del fluido y el Número de Reynolds empleando el caudal y el diámetro conocidos.</p>
-            </div>
-            <div class="tile">
-                <div class="icon"><i class="fa-solid fa-chart-line"></i></div>
-                <h3>2. Fricción</h3>
-                <p>Establecer la rugosidad relativa del material y determinar el factor de fricción mediante Colebrook-White o Moody.</p>
-            </div>
-            <div class="tile">
-                <div class="icon"><i class="fa-solid fa-calculator"></i></div>
-                <h3>3. Energía Final</h3>
-                <p>Sustituir los valores en la ecuación de Darcy-Weisbach para hallar la pérdida de carga y calcular la potencia útil requerida.</p>
-            </div>
-        </div>
-    </div>
+<!-- ============ 5 · QUÉ SIGNIFICA EN SERIE ============ -->
+<div class="slide-container light-bg dense" data-title="5 · Qué significa «en serie»">
+ <div class="bg-shape bg-shape-1"></div><div class="bg-shape bg-shape-2"></div>
+ <div class="slide-kicker">Concepto central de la sesión</div>
+ <h2 class="slide-title">En serie: un solo caudal, pérdidas que se suman, velocidades distintas</h2>
+ <div class="content-area">
+  <div class="serie-diagram" role="img" aria-label="Esquema de dos tramos en serie entre dos tanques">
+   <div class="tank">Tanque 1<br><small>p₁, z₁</small></div>
+   <div class="pipeA">TRAMO A — D grande<small>v<sub>A</sub> menor · h<sub>LA</sub></small></div>
+   <div class="pipeB">TRAMO B — D menor<small>v<sub>B</sub> mayor · h<sub>LB</sub> suele dominar</small></div>
+   <div class="tank">Tanque 2<br><small>p₂, z₂</small></div>
+  </div>
+  <div class="tiled-content">
+   <div class="tile"><div class="icon"><i class="fa-solid fa-droplet"></i></div><h3>Q es el mismo</h3><p>Continuidad: <span class="v">Q = v<sub>A</sub>A<sub>A</sub> = v<sub>B</sub>A<sub>B</sub></span>. Al achicar el diámetro, la velocidad sube con 1/<span class="v">D</span>².</p></div>
+   <div class="tile"><div class="icon"><i class="fa-solid fa-plus"></i></div><h3>h<sub>L</sub> se suma</h3><p>Σ<span class="v">h<sub>L</sub> = h<sub>LA</sub> + h<sub>LB</sub> + …</span> Cada tramo usa <em>su</em> v, su Re, su f y sus accesorios.</p></div>
+   <div class="tile"><div class="icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div><h3>El tramo «cuello» manda</h3><p>Como <span class="v">h<sub>f</sub> ∝ f·L·Q²/D⁵</span>, el tramo menor puede consumir la mayoría de la energía aunque sea corto. Por eso la app reporta el <strong>desglose por tramo</strong>.</p></div>
+  </div>
+  <div class="callout info" style="width:100%"><p><i class="fa-solid fa-laptop-code"></i> <strong>En la app esto ya viene modelado:</strong> Clase I separa <em>succión</em> y <em>descarga</em> y permite «Añadir tramo» en cada lado; Clase II admite N tramos en la línea. Un «sistema en serie» de un solo tubo es solo el caso de entrenamiento.</p></div>
+ </div>
 </div>
 
-<!-- SLIDE 6: Ejemplo Clase 1 (Image Right) -->
-<div class="slide-container light-bg" id="slide6">
-    <div class="bg-shape bg-shape-1"></div>
-    <div class="bg-shape bg-shape-2"></div>
-    <h2 class="slide-title">Ejemplo Aplicado: Clase I</h2>
-    <div class="content-area">
-        <div class="two-column">
-            <div class="text-column">
-                <h3>Enunciado:</h3>
-                <p>Se bombea agua a un caudal de <math style="display: math;" class="inline-math"><mn>0.05</mn><msup><mi>m</mi><mn>3</mn></msup><mo>/</mo><mi>s</mi></math> por una tubería de acero comercial de <math style="display: math;" class="inline-math"><mn>150</mn><mi>m</mi><mi>m</mi></math> de diámetro y <math style="display: math;" class="inline-math"><mn>200</mn><mi>m</mi></math> de longitud recta. Halle la pérdida de energía por fricción.</p>
-                <h3>Desarrollo Lineal:</h3>
-                <ul style="list-style: none; padding:0; margin:0;">
-                    <li style="margin-bottom: 8px;"><strong>1. Vel:</strong> <math style="display: math;" class="inline-math"><mi>v</mi><mo>=</mo><mi>Q</mi><mo>/</mo><mi>A</mi><mo>=</mo><mn>2.83</mn><mi>m</mi><mo>/</mo><mi>s</mi></math></li>
-                    <li style="margin-bottom: 8px;"><strong>2. Re:</strong> <math style="display: math;" class="inline-math"><mi>R</mi><mi>e</mi><mo>=</mo><mn>4.2</mn><mo>×</mo><msup><mn>10</mn><mn>5</mn></msup></math> (Turbulento)</li>
-                    <li style="margin-bottom: 8px;"><strong>3. Fricción:</strong> Diagrama de Moody arroja <math style="display: math;" class="inline-math"><mi>f</mi><mo>=</mo><mn>0.018</mn></math></li>
-                    <li style="margin-bottom: 8px;"><strong>4. Pérdida:</strong> <math style="display: math;" class="inline-math"><msub><mi>h</mi><mi>L</mi></msub><mo>=</mo><mn>0.018</mn><mo>·</mo><mo>(</mo><mn>200</mn><mo>/</mo><mn>0.15</mn><mo>)</mo><mo>·</mo><mo>(</mo><msup><mn>2.83</mn><mn>2</mn></msup><mo>/</mo><mn>19.62</mn><mo>)</mo><mo>=</mo><mn>9.79</mn><mi>m</mi></math></li>
-                </ul>
-            </div>
-            <div class="image-wrapper">
-                <img src="https://github.com/Juansanher25/Sistemastuberiasserie/blob/main/Gemini_Generated_Image_yu6f7ayu6f7ayu6f.png?raw=true" alt="Diagrama de caída de presión en tubería" style="width:100%; height:100%; object-fit:cover;" />
-            </div>
-        </div>
-    </div>
+<!-- ============ 6 · CLASIFICACIÓN + MAPA APP ============ -->
+<div class="slide-container light-bg dense" data-title="6 · Clasificación y mapa de módulos">
+ <div class="bg-shape bg-shape-1"></div><div class="bg-shape bg-shape-2"></div>
+ <div class="slide-kicker">Primero clasifique el problema; después abra el módulo</div>
+ <h2 class="slide-title">Clase I, II o III… y dónde se resuelve en la calculadora</h2>
+ <div class="content-area"><div class="table-layout">
+  <table class="data">
+   <thead><tr><th style="width:16%">Clase</th><th style="width:33%">Datos (lo que usted ya conoce)</th><th style="width:25%">Incógnita</th><th style="width:26%">En la app (menú lateral)</th></tr></thead>
+   <tbody>
+    <tr><td><strong>Clase I</strong></td><td>Geometría por tramo (L, D, ε, accesorios), fluido y <strong>Q</strong></td><td>h<sub>A</sub>, Δp y <strong>potencia</strong></td><td><span class="chip">01 · Clase I — Potencia</span><br>Directo, sin iterar en Q.</td></tr>
+    <tr><td><strong>Clase II</strong></td><td>Geometría, fluido y <strong>energía disponible</strong> (p, z, ± bomba)</td><td><strong>Q</strong> (y v en cada tramo)</td><td><span class="chip">02 · Clase II — Caudal</span><br>Bisección: h<sub>disp</sub> = Σh<sub>L</sub>(Q).</td></tr>
+    <tr><td><strong>Clase III</strong></td><td>L, fluido, <strong>Q exigido</strong> y <strong>pérdida admisible</strong></td><td><strong>D</strong> mínimo + talla comercial</td><td><span class="chip">03 · Clase III — Diámetro</span><br>Bisección en D + tabla comercial.</td></tr>
+    <tr><td colspan="2"><strong>Verificaciones que no son «otra clase»</strong>: ¿cavita? ¿dónde opera la bomba?</td><td>NPSH<sub>a</sub> · punto de operación</td><td><span class="chip">04 · NPSH</span> <span class="chip">05 · Bomba y sistema</span> <span class="chip">06 · Herramientas</span></td></tr>
+   </tbody>
+  </table>
+  <div class="callout warn"><p><strong>Regla de oro antes de digitar:</strong> escriba en el cuaderno «Dato / Incógnita / Módulo». Si no sabe qué módulo abrir, todavía no ha planteado el problema. Y recuerde: el <strong>fluido se escoge una sola vez en el panel lateral</strong> y afecta a todos los módulos.</p></div>
+ </div></div>
 </div>
 
-<!-- SLIDE 7: Clase 2 Teoría (Tiled) -->
-<div class="slide-container light-bg" id="slide7">
-    <div class="bg-shape bg-shape-1"></div>
-    <div class="bg-shape bg-shape-2"></div>
-    <h2 class="slide-title">Clase II: Determinación del Caudal</h2>
-    <div class="content-area">
-        <div class="tiled-content">
-            <div class="tile">
-                <div class="icon"><i class="fa-solid fa-arrows-rotate"></i></div>
-                <h3>1. Asunción Inicial</h3>
-                <p>Al no conocer la velocidad, se asume un factor de fricción inicial situado en la zona de turbulencia completa de Moody.</p>
-            </div>
-            <div class="tile">
-                <div class="icon"><i class="fa-solid fa-bolt"></i></div>
-                <h3>2. Energía a Velocidad</h3>
-                <p>Se reemplaza el factor de fricción asumido en la ecuación de energía para despejar una primera velocidad calculada.</p>
-            </div>
-            <div class="tile">
-                <div class="icon"><i class="fa-solid fa-microchip"></i></div>
-                <h3>3. Iteración Continua</h3>
-                <p>Con la velocidad nueva, se calcula Reynolds, se corrige la fricción y se repite el ciclo hasta alcanzar la convergencia.</p>
-            </div>
-        </div>
-    </div>
+<!-- ============ 7 · CLASE I MÉTODO ============ -->
+<div class="slide-container light-bg" data-title="7 · Clase I · Método">
+ <div class="bg-shape bg-shape-1"></div><div class="bg-shape bg-shape-2"></div>
+ <div class="slide-kicker">Clase I · Dato: Q → Incógnita: potencia</div>
+ <h2 class="slide-title">Clase I: con Q conocido, todo se calcula en cascada</h2>
+ <div class="content-area"><div class="tiled-content">
+  <div class="tile"><div class="icon"><i class="fa-solid fa-gauge-high"></i></div><h3>1 · Cinemática por tramo</h3><p>Con Q y cada D: v = Q/A y Re = vDρ/μ. En serie hay <strong>una v por diámetro</strong>, no una sola.</p></div>
+  <div class="tile"><div class="icon"><i class="fa-solid fa-chart-line"></i></div><h3>2 · Fricción y accesorios</h3><p>ε/D → f (Colebrook/Moody); accesorios por Le/D con f<sub>T</sub> del tramo. De aquí salen h<sub>f</sub> y h<sub>m</sub> tramo a tramo.</p></div>
+  <div class="tile"><div class="icon"><i class="fa-solid fa-plug-circle-bolt"></i></div><h3>3 · Energía y potencias</h3><p>h<sub>A</sub> = (p₂−p₁)/γ + (z₂−z₁) + Σh<sub>L</sub>. Luego P<sub>hidr</sub>=ρgQh<sub>A</sub>, P<sub>freno</sub>=P<sub>h</sub>/η<sub>b</sub>, P<sub>eléct</sub>=P<sub>f</sub>/η<sub>m</sub> (y margen si se pide).</p></div>
+ </div>
+ <div class="callout good" style="width:100%"><p><strong>Por eso Clase I no itera en Q:</strong> la velocidad se conoce desde el primer paso. La única «iteración» interna es la de Colebrook para f, que la app resuelve con Newton–Raphson.</p></div>
+ </div>
 </div>
 
-<!-- SLIDE 8: Ejemplo Clase 2 (Image Right) -->
-<div class="slide-container light-bg" id="slide8">
-    <div class="bg-shape bg-shape-1"></div>
-    <div class="bg-shape bg-shape-2"></div>
-    <h2 class="slide-title">Ejemplo Aplicado: Clase II</h2>
-    <div class="content-area">
-        <div class="two-column">
-            <div class="text-column">
-                <h3>Enunciado:</h3>
-                <p>Dos tanques con un desnivel de <math style="display: math;" class="inline-math"><mn>10</mn><mi>m</mi></math> se conectan por una tubería de <math style="display: math;" class="inline-math"><mn>200</mn><mi>m</mi><mi>m</mi></math>. ¿Qué caudal fluirá libremente por gravedad, es decir, sin ayuda de la presión o de ninguna bomba?</p>
-                <h3>Ruta Iterativa:</h3>
-                <ul style="list-style: none; padding:0; margin:0;">
-                    <li style="margin-bottom: 8px;"><strong>Intento 1:</strong> Asumimos <math style="display: math;" class="inline-math"><mi>f</mi><mo>=</mo><mn>0.02</mn></math>. Despejando energía, obtenemos <math style="display: math;" class="inline-math"><msub><mi>v</mi><mn>1</mn></msub><mo>=</mo><mn>3.8</mn><mi>m</mi><mo>/</mo><mi>s</mi></math>.</li>
-                    <li style="margin-bottom: 8px;"><strong>Corrección:</strong> El Reynolds es <math style="display: math;" class="inline-math"><mn>7.6</mn><mo>×</mo><msup><mn>10</mn><mn>5</mn></msup></math>. El nuevo factor <math style="display: math;" class="inline-math"><mi>f</mi></math> actualizado es <math style="display: math;" class="inline-math"><mn>0.0191</mn></math>.</li>
-                    <li style="margin-bottom: 8px;"><strong>Intento 2:</strong> Recalculamos con <math style="display: math;" class="inline-math"><mi>f</mi><mo>=</mo><mn>0.0191</mn></math> dando <math style="display: math;" class="inline-math"><msub><mi>v</mi><mn>2</mn></msub><mo>=</mo><mn>3.89</mn><mi>m</mi><mo>/</mo><mi>s</mi></math>.</li>
-                    <li style="margin-bottom: 8px;"><strong>Caudal Final:</strong> <math style="display: math;" class="inline-math"><mi>Q</mi><mo>=</mo><msub><mi>v</mi><mn>2</mn></msub><mo>·</mo><mi>A</mi><mo>=</mo><mn>0.122</mn><msup><mi>m</mi><mn>3</mn></msup><mo>/</mo><mi>s</mi></math>.</li>
-                </ul>
-            </div>
-            <div class="image-wrapper">
-                <img src="https://github.com/Juansanher25/Sistemastuberiasserie/blob/main/Gemini_Generated_Image_9y8l1f9y8l1f9y8l.png?raw=true" alt="Sistema de tanques conectados por tubería" style="width:100%; height:100%; object-fit:cover;" />
-            </div>
-        </div>
-    </div>
+<!-- ============ 8 · EJEMPLO GUIADO I ============ -->
+<div class="slide-container light-bg dense" data-title="8 · Ejemplo guiado Clase I (con la app)">
+ <div class="bg-shape bg-shape-1"></div><div class="bg-shape bg-shape-2"></div>
+ <div class="slide-kicker">Ejemplo guiado · Digítelo conmigo · Módulo 01</div>
+ <h2 class="slide-title">Clase I en vivo: bombeo entre tanques abiertos (succión 8″ → descarga 6″)</h2>
+ <div class="content-area"><div class="two-column wide-left" style="align-items:start">
+  <div>
+   <p><strong>Caso:</strong> agua a 50 L/s desde un tanque abierto (z₁=0) a otro abierto 12 m más arriba. η<sub>b</sub>=75 %, η<sub>m</sub>=90 %, margen 10 %. Halle h<sub>A</sub> y las potencias; juzgue las velocidades.</p>
+   <table class="data mini">
+    <tr><th style="width:34%">Campo de la app</th><th>Digite esto (¡con su selector de unidades!)</th></tr>
+    <tr><td>Panel lateral · Fluido</td><td><span class="mono">Agua (20 °C)</span> · p<sub>atm</sub>=<span class="mono">101.325 kPa</span></td></tr>
+    <tr><td>Q · p₁ · z₁ · p₂ · z₂ · z<sub>b</sub></td><td><span class="mono">3000 L/min</span> · <span class="mono">0 kPa</span> · <span class="mono">0 m</span> · <span class="mono">0</span> <strong>(cambie el selector de p₂: viene en <span class="mono">atm</span> → póngalo en <span class="mono">kPa</span>)</strong> · <span class="mono">12 m</span> · <span class="mono">0 m</span></td></tr>
+    <tr><td>Succión (1 tramo)</td><td>L=<span class="mono">8 m</span>, Acero Sch 40, nominal <span class="mono">8″ (DI 202,7 mm)</span>. Deje <em>solo</em>: Entrada de borde agudo ×1 · Codo 90° radio largo, bridado ×1 · Compuerta abierta, bridada ×1.</td></tr>
+    <tr><td>Descarga (1 tramo)</td><td>L=<span class="mono">200 m</span>, Acero Sch 40, nominal <span class="mono">6″ (DI 154,1 mm)</span>. Deje <em>solo</em>: Codo 90° estándar, bridado/soldado ×4 · Check de columpio, bridado ×1 · Compuerta abierta, bridada ×1 · Salida a depósito ×1. → <span class="mono">Calcular potencia</span></td></tr>
+   </table>
+  </div>
+  <div class="panel">
+   <h4>Lo que debe obtener (verifíquese antes de seguir)</h4>
+   <div class="kpis"><div class="kpi"><div class="val">21,65 m</div><div class="lab">Carga h<sub>A</sub></div></div><div class="kpi"><div class="val">9,65 m</div><div class="lab">Σh<sub>L</sub> total</div></div><div class="kpi"><div class="val">17,3 kW</div><div class="lab">P eléct. c/ margen*</div></div></div>
+   <table class="data mini"><tr><th>Tramo</th><th class="num">v (m/s)</th><th class="num">Re</th><th class="num">f</th><th class="num">h<sub>L</sub> (m)</th></tr>
+   <tr><td>Succión 8″</td><td class="num">1,55</td><td class="num">3,13×10⁵</td><td class="num">0,0164</td><td class="num">0,18</td></tr>
+   <tr><td>Descarga 6″</td><td class="num">2,68</td><td class="num">4,12×10⁵</td><td class="num">0,0165</td><td class="num">9,47</td></tr></table>
+   <ul class="tight" style="margin-top:8px"><li><strong>Potencias:</strong> P<sub>h</sub>=10,60 · P<sub>freno</sub>=14,13 · P<sub>eléct</sub>=15,70 kW. <em>*El número grande de la app es la eléctrica <u>con margen</u>: 17,27 kW. Diga siempre cuál reporta.</em></li>
+   <li><strong>Juicio:</strong> descarga 2,68 m/s ✓ (1,2–3,0); succión 1,55 m/s queda <em>al límite</em> (recomendado ≤1,5): por eso la succión se puso una talla mayor.</li>
+   <li><strong>A mano (solo fricción en descarga):</strong> Moody f≈0,016–0,017 → h<sub>f</sub>≈7,9 m. Coincide: la app da h<sub>f</sub>=7,85 m.</li></ul>
+  </div>
+ </div></div>
+ <aside class="notes"><b>Corrección al ejemplo anterior:</b> con D=150 mm el Colebrook correcto es f=0,0165 y h<sub>f</sub>=9,0 m (antes: f=0,018; 9,79 m). Este guiado usa diámetros <b>comerciales</b> (DI reales) para que tablero y app coincidan al centavo. NPSH<sub>a</sub> estimado en Clase I: 9,93 m.</aside>
 </div>
 
-<!-- SLIDE 9: Clase 3 Teoría (Tiled) -->
-<div class="slide-container light-bg" id="slide9">
-    <div class="bg-shape bg-shape-1"></div>
-    <div class="bg-shape bg-shape-2"></div>
-    <h2 class="slide-title">Clase III: Diseño de Diámetro</h2>
-    <div class="content-area">
-        <div class="tiled-content">
-            <div class="tile">
-                <div class="icon"><i class="fa-solid fa-code"></i></div>
-                <h3>1. Dependencia Funcional</h3>
-                <p>El diámetro condiciona el área (velocidad) y la fricción. Se debe dejar la ecuación expresada matemáticamente solo en función de D.</p>
-            </div>
-            <div class="tile">
-                <div class="icon"><i class="fa-solid fa-laptop-code"></i></div>
-                <h3>2. Métodos de Solución</h3>
-                <p>Al ser altamente no lineal, se recurre a algoritmos como Newton-Raphson, hojas de cálculo o ecuaciones empíricas explícitas.</p>
-            </div>
-            <div class="tile">
-                <div class="icon"><i class="fa-solid fa-check-to-slot"></i></div>
-                <h3>3. Catálogo Comercial</h3>
-                <p>El diámetro teórico numérico no se fabrica. Siempre debe seleccionarse el diámetro comercial estandarizado inmediatamente superior.</p>
-            </div>
-        </div>
-    </div>
+<!-- ============ 9 · CLASE II MÉTODO ============ -->
+<div class="slide-container light-bg" data-title="9 · Clase II · Método iterativo">
+ <div class="bg-shape bg-shape-1"></div><div class="bg-shape bg-shape-2"></div>
+ <div class="slide-kicker">Clase II · Dato: energía disponible → Incógnita: Q</div>
+ <h2 class="slide-title">Clase II: la incógnita está dentro de la pérdida… por eso se itera</h2>
+ <div class="content-area"><div class="tiled-content">
+  <div class="tile"><div class="icon"><i class="fa-solid fa-arrows-rotate"></i></div><h3>1 · Suponga f</h3><p>Sin v no hay Re ni f. Arranque con la zona rugosa de Moody (p. ej. f₀=0,020) y calcule K con f<sub>T</sub> (que <em>no</em> depende de Re).</p></div>
+  <div class="tile"><div class="icon"><i class="fa-solid fa-bolt"></i></div><h3>2 · Despeje v de la energía</h3><p>Iguale lo disponible con lo perdido: h<sub>disp</sub>=(fL/D+K)·v²/2g (+ suma por tramos). De ahí sale una primera v y su Q.</p></div>
+  <div class="tile"><div class="icon"><i class="fa-solid fa-microchip"></i></div><h3>3 · Corrija y repita</h3><p>Con la v nueva: Re → f nuevo (Colebrook) → v nueva… hasta que f deje de cambiar. La app hace esto por <strong>bisección en Q</strong>, tramo a tramo.</p></div>
+ </div>
+ <div class="callout warn" style="width:100%"><p><strong>Error clásico:</strong> iterar solo el factor f pero olvidar que, con varios diámetros, <em>cada tramo tiene su propio f</em>. La función que la app anula es F(Q)=h<sub>disp</sub>−Σh<sub>L,tramos</sub>(Q).</p></div>
+ </div>
 </div>
 
-<!-- SLIDE 10: Ejemplo Clase 3 (Image Right) -->
-<div class="slide-container light-bg" id="slide10">
-    <div class="bg-shape bg-shape-1"></div>
-    <div class="bg-shape bg-shape-2"></div>
-    <h2 class="slide-title">Ejemplo Aplicado: Clase III</h2>
-    <div class="content-area">
-        <div class="two-column">
-            <div class="text-column">
-                <h3>Enunciado de Diseño:</h3>
-                <p>Se proyecta una red de tubería para mover <math style="display: math;" class="inline-math"><mn>0.2</mn><msup><mi>m</mi><mn>3</mn></msup><mo>/</mo><mi>s</mi></math> limitando la pérdida de carga a <math style="display: math;" class="inline-math"><mn>5</mn><mi>m</mi></math>. ¿Qué diámetro nominal de catálogo debe instalarse sin importar el material de la tubería?</p>
-                <h3>Decisión Ingenieril:</h3>
-                <ul style="list-style: none; padding:0; margin:0;">
-                    <li style="margin-bottom: 8px;"><strong>Solver:</strong> Expresando <math style="display: math;" class="inline-math"><mi>v</mi></math> como <math style="display: math;" class="inline-math"><mn>4</mn><mi>Q</mi><mo>/</mo><mi>π</mi><msup><mi>D</mi><mn>2</mn></msup></math>, el programa computacional converge en un <math style="display: math;" class="inline-math"><msub><mi>D</mi><mrow><mi>t</mi><mi>e</mi><mi>ó</mi><mi>r</mi><mi>i</mi><mi>c</mi><mi>o</mi></mrow></msub><mo>=</mo><mn>235.8</mn><mi>m</mi><mi>m</mi></math>.</li>
-                    <li style="margin-bottom: 8px;"><strong>Criterio:</strong> Un tubo más pequeño aumentará las pérdidas excediendo los <math style="display: math;" class="inline-math"><mn>5</mn><mi>m</mi></math> permitidos.</li>
-                    <li style="margin-bottom: 8px;"><strong>Selección Catálogo:</strong> Se especifica diámetro de <math style="display: math;" class="inline-math"><mn>250</mn><mi>m</mi><mi>m</mi></math> (10 pulgadas), garantizando cumplimiento normativo.</li>
-                </ul>
-            </div>
-            <div class="image-wrapper">
-                <img src="https://github.com/Juansanher25/Sistemastuberiasserie/blob/main/Gemini_Generated_Image_m0kooim0kooim0ko.png?raw=true" alt="Secciones de tuberías comerciales" style="width:100%; height:100%; object-fit:cover;" />
-            </div>
-        </div>
-    </div>
+<!-- ============ 10 · EJEMPLO GUIADO II ============ -->
+<div class="slide-container light-bg dense" data-title="10 · Ejemplo guiado Clase II (con la app)">
+ <div class="bg-shape bg-shape-1"></div><div class="bg-shape bg-shape-2"></div>
+ <div class="slide-kicker">Ejemplo guiado · Dos iteraciones a mano, verificación en el Módulo 02</div>
+ <h2 class="slide-title">Clase II en vivo: ¿qué caudal baja por gravedad entre dos tanques?</h2>
+ <div class="content-area"><div class="two-column wide-left" style="align-items:start">
+  <div>
+   <p><strong>Caso:</strong> tanques abiertos con niveles z₁=8 m y z₂=2 m (h<sub>disp</sub>=6 m), unidos por 250 m de acero Sch 40 de 6″. Sin bomba. Agua a 20 °C.</p>
+   <table class="data mini">
+    <tr><th style="width:34%">Campo de la app</th><th>Digite esto</th></tr>
+    <tr><td>Menú · Módulo 02</td><td>p₁=<span class="mono">0 kPa</span> · z₁=<span class="mono">8 m</span> · p₂=<span class="mono">0 kPa</span> · z₂=<span class="mono">2 m</span> · <strong>bomba desmarcada</strong> (verifique que «Energía disponible» marque ≈ 6,00 m).</td></tr>
+    <tr><td>Tramo único</td><td>L=<span class="mono">250 m</span> (viene 100: cámbielo), Acero Sch 40 <span class="mono">6″</span>. Los accesorios <strong>ya vienen precargados</strong> para este ejemplo: Entrada de borde agudo ×1 · Codo 90° radio largo, bridado ×4 · Salida a depósito ×1. No agregue más. → <span class="mono">Calcular caudal</span></td></tr>
+   </table>
+   <table class="data mini" style="margin-top:10px"><tr><th>Iteración a mano</th><th class="num">f supuesto</th><th class="num">v (m/s)</th><th class="num">Re</th><th class="num">f (Colebrook)</th></tr>
+   <tr><td>1</td><td class="num">0,0200</td><td class="num">1,84</td><td class="num">2,82×10⁵</td><td class="num">0,0171</td></tr>
+   <tr><td>2</td><td class="num">0,0171</td><td class="num">1,98</td><td class="num">3,03×10⁵</td><td class="num">0,0169 ✓</td></tr></table>
+  </div>
+  <div class="panel">
+   <h4>Resultado (debe coincidir con su pantalla)</h4>
+   <div class="kpis"><div class="kpi"><div class="val">36,96 L/s</div><div class="lab">Q = 133,1 m³/h</div></div><div class="kpi"><div class="val">1,98 m/s</div><div class="lab">Velocidad</div></div><div class="kpi"><div class="val">6,00 m</div><div class="lab">Σh<sub>L</sub> verifica</div></div></div>
+   <ul class="tight"><li>Detalle: h<sub>f</sub>=5,51 m · h<sub>m</sub>=0,49 m · Re=3,04×10⁵ · f=0,01694 · K<sub>tot</sub>=2,46 (Le/D=64, K<sub>dir</sub>=1,50).</li>
+   <li><strong>Autoverificación Clase II:</strong> la fila «Pérdida calculada a ese Q» <em>tiene</em> que igualar la energía disponible. Si no, hay un dato mal digitado.</li>
+   <li><strong>Pregunta relámpago (30 s en la app):</strong> si el nivel superior baja a z₁=6 m, ¿Q? → <strong>29,89 L/s</strong> (−19 %). Q cae menos que h porque h<sub>L</sub>∝Q².</li></ul>
+  </div>
+ </div></div>
+ <aside class="notes"><b>Corrección al ejemplo anterior:</b> el enunciado previo (desnivel 10 m, D=200 mm) no daba la longitud y por tanto Q era indeterminado; además v≈3,9 m/s era irreal. Este caso cierra con v=1,98 m/s y converge en 2 iteraciones. Muestre en la gráfica del Módulo 02 la intersección con la curva del sistema.</aside>
 </div>
 
-<!-- SLIDE 11: Ejercicios Propuestos -->
-<div class="slide-container light-bg" id="slide11">
-    <div class="bg-shape bg-shape-1"></div>
-    <div class="bg-shape bg-shape-2"></div>
-    <h2 class="slide-title">Ejercicios de Práctica</h2>
-    <div class="content-area">
-        <div class="bullet-list">
-            <ul>
-                <li><i class="fa-solid fa-droplet"></i> <strong>Clase I:</strong> Calcule la caída de presión y la potencia requerida por una bomba (eficiencia <math style="display: math;" class="inline-math"><mn>75</mn><mo>%</mo></math>) en una red de <math style="display: math;" class="inline-math"><mn>500</mn><mi>m</mi></math> de acero (8 pulg). La red eleva agua <math style="display: math;" class="inline-math"><mn>20</mn><mi>m</mi></math> a un caudal de <math style="display: math;" class="inline-math"><mn>150</mn><mi>L</mi><mo>/</mo><mi>s</mi></math>. Presión inicial: <math style="display: math;" class="inline-math"><mn>100</mn><mi>k</mi><mi>P</mi><mi>a</mi></math>, Presión final: <math style="display: math;" class="inline-math"><mn>250</mn><mi>k</mi><mi>P</mi><mi>a</mi></math>. El sistema incluye 2 codos de 90° estándar y 1 válvula de compuerta abierta.</li>
-                <li><i class="fa-solid fa-arrow-right-arrow-left"></i> <strong>Clase II:</strong> Determine el caudal de queroseno que fluye entre dos depósitos (Tanque 1: <math style="display: math;" class="inline-math"><mn>300</mn><mi>k</mi><mi>P</mi><mi>a</mi></math>; Tanque 2: <math style="display: math;" class="inline-math"><mn>101</mn><mi>k</mi><mi>P</mi><mi>a</mi></math>). La tubería es <strong>horizontal</strong>, de 5 pulgadas, <math style="display: math;" class="inline-math"><mn>320</mn><mi>m</mi></math> de largo, y posee 4 codos de 90° estándar.</li>
-                <li><i class="fa-solid fa-ruler-combined"></i> <strong>Clase III:</strong> Dimensione una tubería industrial <strong>completamente horizontal</strong> para transportar <math style="display: math;" class="inline-math"><mn>85</mn><mi>L</mi><mo>/</mo><mi>s</mi></math> de fluido de proceso garantizando que la caída de presión (<math style="display: math;" class="inline-math"><mi>Δ</mi><mi>P</mi></math>) se mantenga estrictamente por debajo de los <math style="display: math;" class="inline-math"><mn>115</mn><mi>k</mi><mi>P</mi><mi>a</mi></math>.</li>
-            </ul>
-            <div style="margin-top: 15px; padding: 15px; background-color: #fff; border-left: 5px solid #11caa0; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                <p style="margin: 0; font-size: 20px; color: #005088;">
-                    <i class="fa-solid fa-lightbulb" style="color: #f1c40f; margin-right: 10px;"></i> 
-                    <strong>Tip para estudiantes:</strong> Te propongo resolver estos ejercicios a mano y luego <strong>verificar tus resultados iterativos</strong> utilizando nuestra plataforma oficial.
-                </p>
-            </div>
-        </div>
-    </div>
+<!-- ============ 11 · CLASE III MÉTODO ============ -->
+<div class="slide-container light-bg" data-title="11 · Clase III · Método de diseño">
+ <div class="bg-shape bg-shape-1"></div><div class="bg-shape bg-shape-2"></div>
+ <div class="slide-kicker">Clase III · Datos: Q y pérdida admisible → Incógnita: D</div>
+ <h2 class="slide-title">Clase III: diseñar es invertir la ecuación… y luego ir al catálogo</h2>
+ <div class="content-area"><div class="tiled-content">
+  <div class="tile"><div class="icon"><i class="fa-solid fa-code"></i></div><h3>1 · Todo queda en función de D</h3><p>v=4Q/πD², Re(D), f(D), K(D) vía f<sub>T</sub>. La pérdida admisible sale de la energía: h<sub>adm</sub>=(p₁−p₂)/γ+(z₁−z₂)+h<sub>bomba</sub>.</p></div>
+  <div class="tile"><div class="icon"><i class="fa-solid fa-laptop-code"></i></div><h3>2 · Se resuelve h<sub>L</sub>(D)=h<sub>adm</sub></h3><p>Ecuación fuertemente no lineal (≈D<sup>−5</sup>): bisección/Newton. La app entrega el <strong>D interior mínimo teórico</strong> y la curva h<sub>L</sub>(D).</p></div>
+  <div class="tile"><div class="icon"><i class="fa-solid fa-check-to-slot"></i></div><h3>3 · Talla comercial y juicio</h3><p>Se escoge el nominal con <strong>DI ≥ D<sub>mín</sub></strong>, se comprueba que la talla anterior <em>falla</em> y que la velocidad queda en el rango del servicio. Sin ese triple chequeo no hay diseño.</p></div>
+ </div></div>
 </div>
 
-<!-- SLIDE 12: Respuestas a los ejercicios -->
-<div class="slide-container light-bg" id="slide12">
-    <div class="bg-shape bg-shape-1"></div>
-    <div class="bg-shape bg-shape-2"></div>
-    <h2 class="slide-title">Respuestas a Ejercicios de Práctica</h2>
-    <div class="content-area">
-        <div class="tiled-content" style="flex-direction: column; gap: 20px; width: 100%;">
-            
-            <div class="tile" style="flex-direction: row; text-align: left; padding: 25px 40px; justify-content: flex-start; gap: 30px;">
-                <div class="icon" style="margin: 0; font-size: 40px;"><i class="fa-solid fa-check-circle"></i></div>
-                <div>
-                    <h3 style="margin-bottom: 5px;">Clase I (Resultados esperados)</h3>
-                    <p style="font-size: 20px;">Pérdida de carga estimada: <math class="inline-math"><msub><mi>h</mi><mi>L</mi></msub><mo>≈</mo><mn>41.5</mn><mtext> m</mtext></math>. <br>Potencia real requerida de la bomba: <math class="inline-math"><msub><mi>P</mi><mi>b</mi></msub><mo>≈</mo><mn>146</mn><mtext> kW</mtext></math> (asumiendo propiedades estándar del agua a 20°C).</p>
-                </div>
-            </div>
-
-            <div class="tile" style="flex-direction: row; text-align: left; padding: 25px 40px; justify-content: flex-start; gap: 30px;">
-                <div class="icon" style="margin: 0; font-size: 40px;"><i class="fa-solid fa-check-circle"></i></div>
-                <div>
-                    <h3 style="margin-bottom: 5px;">Clase II (Resultados esperados)</h3>
-                    <p style="font-size: 20px;">Caudal volumétrico convergente: <math class="inline-math"><mi>Q</mi><mo>≈</mo><mn>28.5</mn><mtext> L/s</mtext></math> <br><span style="font-size: 16px;">(El resultado exacto variará ligeramente según el modelo de viscosidad del queroseno utilizado en tablas).</span></p>
-                </div>
-            </div>
-
-            <div class="tile" style="flex-direction: row; text-align: left; padding: 25px 40px; justify-content: flex-start; gap: 30px;">
-                <div class="icon" style="margin: 0; font-size: 40px;"><i class="fa-solid fa-check-circle"></i></div>
-                <div>
-                    <h3 style="margin-bottom: 5px;">Clase III (Resultados esperados)</h3>
-                    <p style="font-size: 20px;">Diámetro teórico calculado: <math class="inline-math"><msub><mi>D</mi><mtext>teórico</mtext></msub><mo>≈</mo><mn>162</mn><mtext> mm</mtext></math>. <br>Selección final recomendada por catálogo: <strong>Diámetro nominal de 8 pulgadas.</strong></p>
-                </div>
-            </div>
-
-        </div>
-    </div>
+<!-- ============ 12 · EJEMPLO GUIADO III ============ -->
+<div class="slide-container light-bg dense" data-title="12 · Ejemplo guiado Clase III (con la app)">
+ <div class="bg-shape bg-shape-1"></div><div class="bg-shape bg-shape-2"></div>
+ <div class="slide-kicker">Ejemplo guiado · Módulo 03 · Del D teórico a la talla que sí se vende</div>
+ <h2 class="slide-title">Clase III en vivo: diámetro para 60 L/s sin pasarse de la pérdida admisible</h2>
+ <div class="content-area"><div class="two-column wide-left" style="align-items:start">
+  <div>
+   <p><strong>Caso:</strong> agua, Q=60 L/s en 320 m de acero. Entrada a 300 kPa (z₁=10 m); se debe llegar a 180 kPa subiendo a z₂=16 m. Sin bomba adicional.</p>
+   <div class="eq" style="font-size:16.5px">h<sub>L,adm</sub> = (300−180)·10³/γ + (10−16) = 12,26 − 6,00 = <strong>6,26 m</strong><small>Ese es todo el «presupuesto» de fricción. La app lo calcula sola en «Pérdida admisible»: verifíquelo.</small></div>
+   <table class="data mini"><tr><th style="width:34%">Campo de la app</th><th>Digite esto</th></tr>
+   <tr><td>Menú · Módulo 03</td><td>Q=<span class="mono">60 L/s</span> (ya viene así) · p₁=<span class="mono">300 kPa</span> · z₁=<span class="mono">10</span> · p₂=<span class="mono">180 kPa</span> · z₂=<span class="mono">16</span> · h<sub>bomba</sub>=<span class="mono">0</span> · L=<span class="mono">320 m</span></td></tr>
+   <tr><td>Material / familia</td><td>Material <span class="mono">Acero comercial (ε=0,046 mm)</span> · Familia <span class="mono">Acero Sch 40</span>. Accesorios precargados: Entrada ×1 · Codo 90° estándar, bridado/soldado ×3 · Salida ×1. → <span class="mono">Calcular diámetro</span></td></tr></table>
+  </div>
+  <div class="panel">
+   <h4>Decisión de ingeniería</h4>
+   <div class="kpis"><div class="kpi"><div class="val">193,4 mm</div><div class="lab">D mínimo teórico</div></div><div class="kpi"><div class="val">8″ Sch 40</div><div class="lab">Selección (DI 202,7)</div></div><div class="kpi"><div class="val">79 %</div><div class="lab">Uso de h<sub>adm</sub></div></div></div>
+   <table class="data mini"><tr><th>Nominal</th><th class="num">v (m/s)</th><th class="num">h<sub>L</sub> (m)</th><th>Veredicto</th></tr>
+   <tr><td>6″ (154,1 mm)</td><td class="num">3,22</td><td class="num">19,35</td><td class="tag-no">Falla (309 %)</td></tr>
+   <tr><td><strong>8″ (202,7 mm)</strong></td><td class="num">1,86</td><td class="num">4,96</td><td class="tag-ok">Cumple y v ✓</td></tr>
+   <tr><td>10″ (254,5 mm)</td><td class="num">1,18</td><td class="num">1,63</td><td class="tag-warn">Sobra; v bajo el rango</td></tr></table>
+   <p style="font-size:15px;margin-top:8px">Con D<sub>mín</sub>: v=2,04 m/s, Re=3,94×10⁵, f=0,0161. La gráfica h<sub>L</sub>(D) del Módulo 03 muestra el cruce con la línea roja de 6,26 m: obsérvela, no solo lea el número.</p>
+  </div>
+ </div></div>
+ <aside class="notes"><b>Corrección al ejemplo anterior:</b> faltaban L, fluido y material, y el D=235,8 mm citado no reproduce ningún L razonable con Q=0,2 m³/s y h=5 m. Este caso está cerrado y verificado contra el solver (bisección en D de la app).</aside>
 </div>
 
-<!-- SLIDE 13: Herramienta Computacional -->
-<div class="slide-container light-bg" id="slide13">
-    <div class="bg-shape bg-shape-1"></div>
-    <div class="bg-shape bg-shape-2"></div>
-    <h2 class="slide-title">Herramienta Computacional del Curso</h2>
-    <div class="content-area">
-        <div class="two-column">
-            <div class="text-column">
-                <h3 style="font-size: 36px; margin-bottom: 20px;">Cálculo de Tuberías y Bombas</h3>
-                <p>Para agilizar el proceso iterativo y corroborar los cálculos analíticos elaborados en clase, he dispuesto una aplicación web interactiva desarrollada específicamente para nuestra asignatura.</p>
-                <ul style="list-style: none; padding:0; margin-top:25px;">
-                    <li style="margin-bottom: 15px; font-size: 22px;"><i class="fa-solid fa-check" style="color: #11caa0; margin-right: 15px;"></i> Resolución de sistemas de <strong>Clase I, II y III</strong>.</li>
-                    <li style="margin-bottom: 15px; font-size: 22px;"><i class="fa-solid fa-check" style="color: #11caa0; margin-right: 15px;"></i> Cálculo de pérdidas de energía por <strong>fricción y accesorios</strong>.</li>
-                    <li style="margin-bottom: 15px; font-size: 22px;"><i class="fa-solid fa-check" style="color: #11caa0; margin-right: 15px;"></i> Estimación de potencia requerida para <strong>bombas</strong>.</li>
-                </ul>
-                <a href="https://juansanher25.github.io/tuberiasybombas/" target="_blank" style="display: inline-flex; align-items: center; margin-top: 35px; background-color: #005088; color: #f3f0df; padding: 18px 35px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 24px; transition: background 0.3s; box-shadow: 0 4px 10px rgba(0, 80, 136, 0.3);">
-                    <i class="fa-solid fa-laptop-code" style="margin-right: 15px;"></i> Acceder a la Herramienta
-                </a>
-            </div>
-            <div class="image-wrapper" style="border-color: #11caa0; box-shadow: 0 10px 25px rgba(17, 202, 160, 0.2);">
-                <img src="https://github.com/Juansanher25/Sistemastuberiasserie/blob/main/Portda%20p%C3%A1gina%20web.jpg?raw=true" alt="Interfaz de la herramienta web del profesor" style="width:100%; height:100%; object-fit:cover;" />
-            </div>
-        </div>
-    </div>
+<!-- ============ 13 · LA APP V2.0 ============ -->
+<div class="slide-container light-bg dense" data-title="13 · La calculadora v2.0 por dentro">
+ <div class="bg-shape bg-shape-1"></div><div class="bg-shape bg-shape-2"></div>
+ <div class="slide-kicker">Herramienta oficial del curso · Hidráulica de Tuberías en Serie v2.0</div>
+ <h2 class="slide-title">Seis módulos, un solo flujo de trabajo</h2>
+ <div class="content-area"><div style="display:grid;grid-template-columns:1fr 245px;gap:26px;width:100%;align-items:center">
+  <table class="data">
+   <tr><th style="width:27%">Módulo (menú lateral)</th><th>Resuelve</th><th style="width:30%">Úselo hoy para…</th></tr>
+   <tr><td><strong>01 · Clase I — Potencia</strong></td><td>h<sub>A</sub>, potencias, desglose por tramo, EGL/HGL, presiones en bridas</td><td>Guiado I · Práctica A · Actividad final</td></tr>
+   <tr><td><strong>02 · Clase II — Caudal</strong></td><td>Q por bisección (± bomba: cabeza constante o curva H₀/Q<sub>máx</sub>)</td><td>Guiado II · Práctica B</td></tr>
+   <tr><td><strong>03 · Clase III — Diámetro</strong></td><td>D<sub>mín</sub> + alternativas comerciales con % de uso</td><td>Guiado III · Práctica C</td></tr>
+   <tr><td><strong>04 · NPSH disponible</strong></td><td>Margen de cavitación, Q límite y rediseños cuantificados</td><td>Actividad final (Bogotá)</td></tr>
+   <tr><td><strong>05 · Bomba y sistema</strong> · <strong>06 · Herramientas</strong></td><td>Punto de operación y semejanza · pérdidas locales, capacidad, conversor</td><td>Próxima temática · chequeos rápidos</td></tr>
+  </table>
+  <div style="text-align:center">
+   <div class="qrbox"><svg viewBox="0 0 37 37" aria-label="QR calculadora"><use href="#qrApp"/></svg><div class="url">juansanher25.github.io/<br>tuberiasybombas</div></div>
+   <a class="app-btn small" href="https://juansanher25.github.io/tuberiasybombas/" target="_blank" rel="noopener"><i class="fa-solid fa-laptop-code"></i> Abrir la calculadora</a>
+   <p style="font-size:13px;color:#556;margin-top:8px">Se abre en Inicio: navegue por el <strong>menú lateral</strong> (en el celular, botón de menú). Funciona sin conexión una vez cargada; puede <em>Guardar/Cargar caso</em> y <em>Exportar CSV</em>.</p>
+  </div>
+ </div></div>
+ <div class="foot">Base de datos v2.0: 20 fluidos · 18 materiales · 8 familias comerciales · 53 accesorios Crane/Mott/White. Supuestos: flujo permanente, newtoniano incompresible, α=1; fuera de alcance: golpe de ariete y flujo bifásico.</div>
 </div>
 
-<!-- SLIDE 14: Cuestionario -->
-<div class="slide-container dark-bg" id="slide14">
-    <div class="bg-shape bg-shape-1"></div>
-    <div class="bg-shape bg-shape-2"></div>
-    <div class="qa-layout">
-        <h2>Cuestionario Rápido</h2>
-        <p>1. ¿Por qué motivo los problemas de Clase II y III exigen obligatoriamente procesos iterativos o numéricos?</p>
-        <p>2. En un escenario Clase I, ¿qué ocurre geométricamente con la pérdida de carga si se decide reducir el diámetro a la mitad manteniendo el caudal intacto?</p>
-        <p>3. ¿De qué forma afecta la viscosidad termodinámica del fluido a la selección comercial en un problema Clase III?</p>
-        <div class="contact-info">
-            Espacio para debate abierto y resolución de dudas
-        </div>
-    </div>
+<!-- ============ 14 · PROTOCOLO SIN ERRORES ============ -->
+<div class="slide-container light-bg dense" data-title="14 · Protocolo de uso sin errores">
+ <div class="bg-shape bg-shape-1"></div><div class="bg-shape bg-shape-2"></div>
+ <div class="slide-kicker">Antes de las prácticas · 3 minutos que ahorran 30</div>
+ <h2 class="slide-title">Protocolo de digitación: los ocho chequeos</h2>
+ <div class="content-area"><div class="two-column" style="align-items:start">
+  <div class="panel"><h4>Al entrar a cada caso</h4>
+   <ol class="steps">
+    <li><strong>Fluido del panel lateral</strong> (afecta todo). Anote ρ, μ — y al cambiar de ejercicio, <em>regréselo</em>.</li>
+    <li><strong>Selector de unidades junto a cada número.</strong> Trampas reales: en Clase I, Q viene en <span class="mono">L/min</span> y <strong>p₂ viene en <span class="mono">atm</span></strong>; en Clase III, Q viene en <span class="mono">L/s</span>.</li>
+    <li><strong>Presiones manométricas</strong> (0 = tanque abierto) y cotas con el mismo datum, incluida z<sub>b</sub>.</li>
+    <li><strong>Accesorios precargados:</strong> cada tramo nace con accesorios de ejemplo. Borre (✕) o ajuste cantidades hasta dejar <em>solo</em> los del enunciado; verifique la línea «Le/D · ΣK · N.º accesorios».</li>
+   </ol></div>
+  <div class="panel"><h4>Al construir tramos y leer resultados</h4>
+   <ol class="steps" start="5">
+    <li><strong>Escoja familia → diámetro nominal</strong>: la app escribe sola el DI real. No digite «150» creyendo que son mm si el selector está en m.</li>
+    <li><strong>Succión ≠ descarga</strong> (Clase I): cada lado con su(s) tramo(s). Un accesorio pertenece al tramo donde lo inscriba — y su K usa la v de <em>ese</em> tramo.</li>
+    <li><strong>Nombre la potencia:</strong> hidráulica, al freno, eléctrica o eléctrica con margen (el titular). Idem en Clase III: D teórico ≠ talla escogida.</li>
+    <li><strong>Audite antes de entregar:</strong> ¿v en rango? ¿Re y régimen coherentes? ¿Clase II cierra h<sub>disp</sub>=Σh<sub>L</sub>? ¿NPSH<sub>a</sub> > NPSH<sub>r</sub>×FS? Guarde el caso / exporte CSV.</li>
+   </ol></div>
+ </div></div>
+ <aside class="notes"><b>Docente:</b> proyecte 20 segundos el selector de p₂ en atm de Clase I: es la fuente n.º 1 de resultados ×100. Rangos de la app: succión 0,6–1,5 · descarga 1,2–3,0 · proceso 1,5–2,5 · acueducto 0,9–1,5 m/s.</aside>
 </div>
 
-<!-- SLIDE 15: Bibliografía y Recursos -->
-<div class="slide-container light-bg" id="slide15">
-    <div class="bg-shape bg-shape-1"></div>
-    <div class="bg-shape bg-shape-2"></div>
-    <h2 class="slide-title" style="text-align: center; margin-bottom: 50px;">Bibliografía y Recursos Adicionales</h2>
-    <div class="content-area">
-        <div class="bullet-list" style="max-width: 1000px;">
-            <ul>
-                <li style="margin-bottom: 30px;">
-                    <i class="fa-solid fa-book"></i>
-                    <strong>Libro Guía del Docente:</strong><br>
-                    <span style="display: block; margin-top: 10px; font-size: 20px;">Sandoval, J. (Ed.). (2021). <em>Balances de materia y energía aplicados a la investigación</em>. Publicaciones Universidad de América. <br><a href="https://doi.org/10.29097/9789585303058" target="_blank" style="color: #005088;">https://doi.org/10.29097/9789585303058</a></span>
-                </li>
-                <li style="margin-bottom: 30px;">
-                    <i class="fa-brands fa-youtube" style="color: #ff0000;"></i>
-                    <strong>Recursos Audiovisuales (Material Complementario):</strong>
-                    <ul style="margin-top: 15px;">
-                        <li style="font-size: 18px; margin-bottom: 10px; padding-left: 35px;">
-                            <i class="fa-solid fa-play" style="font-size: 14px; color: #11caa0; top: 6px;"></i>
-                            <a href="https://youtu.be/8Vl7P6CdfKA?si=mU688_sdGFzko09z" target="_blank" style="color: #005088; text-decoration: none; font-weight: 500;">Ejercicio sistema en serie clase II, con hoja de cálculo</a>
-                        </li>
-                        <li style="font-size: 18px; margin-bottom: 10px; padding-left: 35px;">
-                            <i class="fa-solid fa-play" style="font-size: 14px; color: #11caa0; top: 6px;"></i>
-                            <a href="https://youtu.be/nJCNb6bRNf4?si=UQDq3GwFL7WNYfdK" target="_blank" style="color: #005088; text-decoration: none; font-weight: 500;">Ejercicio de Sistemas en Serie Clase II</a>
-                        </li>
-                        <li style="font-size: 18px; margin-bottom: 10px; padding-left: 35px;">
-                            <i class="fa-solid fa-play" style="font-size: 14px; color: #11caa0; top: 6px;"></i>
-                            <a href="https://youtu.be/6o9MjOjmBR8?si=EqJngzjhbAYJLmIT" target="_blank" style="color: #005088; text-decoration: none; font-weight: 500;">Sistemas de tubería en serie Clase III</a>
-                        </li>
-                    </ul>
-                </li>
-                <li>
-                    <i class="fa-solid fa-laptop-code" style="color: #11caa0;"></i>
-                    <strong>Plataforma Computacional Interactiva:</strong><br>
-                    <span style="display: block; margin-top: 10px; font-size: 20px;">Aplicación web para validación de resultados iterativos.<br><a href="https://github.com/Juansanher25/Sistemastuberiasserie/blob/main/Calculadora%20tuber%C3%ADas%20y%20Bombas.png?raw=true" target="_blank" style="color: #005088; font-weight: 500;">https://juansanher25.github.io/tuberiasybombas/</a></span>
-                </li>
-            </ul>
-        </div>
-    </div>
+<!-- ============ 15 · PRÁCTICA A ============ -->
+<div class="slide-container light-bg dense" data-title="15 · Práctica A · Clase I multitramo">
+ <div class="bg-shape bg-shape-1"></div><div class="bg-shape bg-shape-2"></div>
+ <div class="slide-kicker">Práctica en parejas · Uno lee, el otro digita · Módulo 01</div>
+ <h2 class="slide-title">Práctica A — Clase I con tres tramos en serie (a mano sería interminable)</h2>
+ <div class="content-area"><div class="two-column wide-left" style="align-items:start">
+  <div>
+   <p>Se bombean <strong>25 L/s de agua (20 °C)</strong> a un tanque presurizado. Determine h<sub>A</sub> y las potencias, y diagnostique el sistema. La descarga <em>cambia de diámetro</em> a mitad de camino: eso es serie de verdad.</p>
+   <table class="data mini">
+    <tr><th style="width:30%">Campo</th><th>Digite esto</th></tr>
+    <tr><td>Operación</td><td>Q=<span class="mono">1500 L/min</span> · p₁=<span class="mono">0 kPa</span> · z₁=<span class="mono">1.5 m</span> · p₂=<span class="mono">150</span> con selector en <span class="mono">kPa</span> · z₂=<span class="mono">22 m</span> · z<sub>b</sub>=<span class="mono">0</span> · η<sub>b</sub>=<span class="mono">72 %</span> · η<sub>m</sub>=<span class="mono">90 %</span> · margen=<span class="mono">10 %</span></td></tr>
+    <tr><td>Succión</td><td>L=<span class="mono">6 m</span>, <span class="mono">6″ Sch 40</span>: Válvula de pie con colador (bisagra) ×1 · Codo 90° radio largo, bridado ×1 · Compuerta abierta, bridada ×1 <em>(solo esos)</em>.</td></tr>
+    <tr><td>Descarga · Tramo 1</td><td>L=<span class="mono">30 m</span>, <span class="mono">4″ Sch 40</span>: Check de columpio, bridado ×1 · Codo 90° estándar, bridado/soldado ×3 · Tee, flujo directo, bridada ×1.</td></tr>
+    <tr><td>Descarga · Tramo 2</td><td><span class="mono">Añadir tramo de descarga</span>: L=<span class="mono">150 m</span>, <span class="mono">5″ Sch 40</span>: Ampliación brusca ×1 <em>(inscríbala en este tramo)</em> · Codo 90° estándar ×4 · Compuerta abierta, bridada ×1 · Salida a depósito ×1.</td></tr>
+   </table>
+  </div>
+  <div class="panel"><h4>Responda (con la tabla «Desglose por tramo»)</h4>
+   <ol class="steps">
+    <li>h<sub>A</sub>, Σh<sub>L</sub> y las <strong>cuatro</strong> potencias. ¿Cuál escogería para comprar el motor y por qué?</li>
+    <li>% de Σh<sub>L</sub> de cada tramo. ¿Cuál tramo pierde más <em>por metro</em>? Explíquelo con v² y D⁵.</li>
+    <li>Juzgue cada velocidad contra su rango (succión / descarga). ¿Hay alguna fuera de rango? ¿Qué riesgo trae?</li>
+    <li><strong>Segunda corrida:</strong> suba Q a <span class="mono">3000 L/min</span> sin tocar la geometría. ¿Σh<sub>L</sub> se multiplica exactamente por 4? ¿Sería viable solo cambiar la bomba?</li>
+   </ol>
+   <div class="callout info"><p><strong>Entregable:</strong> captura del resultado principal + desglose por tramo, y sus 4 respuestas en máximo 8 líneas.</p></div>
+  </div>
+ </div></div>
+ <aside class="notes"><b>Clave A:</b> ΣhL=8,97 m (suc 0,20 · dis1 4,10 · dis2 4,68) · hEst+pres=35,82 · hA=44,80 m · Ph=10,96 Pf=15,23 Pe=16,92 Pdes=18,61 kW · v: 1,34 / 3,04 (sobre el rango) / 1,94 · NPSHa≈11,41 m. Con Q×2: ΣhL=34,63 (×3,86; f baja), hA=70,46, Pdes=58,54 kW, vDis1=6,09 inaceptable.</aside>
 </div>
 
-<!-- CONTROLES Y LÓGICA DE PRESENTACIÓN -->
-<div class="presentation-controls">
-    <button onclick="prevSlide()" title="Anterior (Flecha Izquierda)"><i class="fa-solid fa-chevron-left"></i></button>
-    <span class="counter" id="slide-counter">1 / 15</span>
-    <button onclick="nextSlide()" title="Siguiente (Flecha Derecha o Espacio)"><i class="fa-solid fa-chevron-right"></i></button>
+<!-- ============ 16 · PRÁCTICA B ============ -->
+<div class="slide-container light-bg dense" data-title="16 · Práctica B · Clase II dos tramos">
+ <div class="bg-shape bg-shape-1"></div><div class="bg-shape bg-shape-2"></div>
+ <div class="slide-kicker">Práctica en parejas · Cambie el fluido… y acuérdese de regresarlo · Módulo 02</div>
+ <h2 class="slide-title">Práctica B — Clase II: transferencia de queroseno con reducción 8″ → 6″</h2>
+ <div class="content-area"><div class="two-column wide-left" style="align-items:start">
+  <div>
+   <p>Dos depósitos de queroseno (manométricas: 200 y 140 kPa) se comunican por una línea en serie de dos diámetros, sin bomba. ¿Qué caudal se transfiere solo?</p>
+   <table class="data mini">
+    <tr><th style="width:30%">Campo</th><th>Digite esto</th></tr>
+    <tr><td>Panel lateral</td><td>Fluido: <span class="mono">Kerosén / jet A (20 °C)</span> (ρ=800 kg/m³, μ=1,6 mPa·s). Verifique que las casillas ρ/μ cambiaron.</td></tr>
+    <tr><td>Módulo 02</td><td>p₁=<span class="mono">200 kPa</span> · z₁=<span class="mono">8 m</span> · p₂=<span class="mono">140 kPa</span> · z₂=<span class="mono">4 m</span> · bomba <strong>desmarcada</strong>. Antes de calcular: prediga h<sub>disp</sub>=(p₁−p₂)/γ+(z₁−z₂) y compárelo con el aviso de la app.</td></tr>
+    <tr><td>Tramo 1</td><td>L=<span class="mono">250 m</span>, <span class="mono">8″ Sch 40</span>: Entrada de borde agudo ×1 · Codo 90° estándar, bridado/soldado ×3 · Compuerta abierta, bridada ×1.</td></tr>
+    <tr><td>Tramo 2</td><td><span class="mono">Añadir tramo</span>: L=<span class="mono">300 m</span>, <span class="mono">6″ Sch 40</span>: Contracción gradual (cono 30°) ×1 <em>(en este tramo)</em> · Codo 90° estándar ×4 · <strong>Globo abierta, bridada ×1</strong> · Salida a depósito ×1.</td></tr>
+   </table>
+  </div>
+  <div class="panel"><h4>Responda</h4>
+   <ol class="steps">
+    <li>Q en L/s y m³/h. Verifique el cierre: Σh<sub>L</sub>(Q) frente a h<sub>disp</sub>.</li>
+    <li>v, Re, f y % de pérdida de <strong>cada</strong> tramo. ¿Por qué el tramo de 6″ se lleva casi todo si las longitudes son parecidas?</li>
+    <li><strong>Regulación:</strong> sustituya la globo por <span class="mono">Globo 1/2 abierta</span> y recalcule. ¿Cuánto cae Q en %? ¿Sirve esa válvula para regular esta línea?</li>
+    <li><strong>Envejecimiento (vuelva a globo abierta):</strong> suba ε a <span class="mono">0.30 mm</span> en <em>ambos</em> tramos. ¿Nuevo Q? Compare: ¿pesa más cerrar la válvula o incrustar la tubería?</li>
+   </ol>
+   <div class="callout warn"><p><strong>Al terminar:</strong> regrese el panel lateral a <span class="mono">Agua (20 °C)</span>. La mitad de los «errores de la app» en la Práctica C serán este olvido.</p></div>
+  </div>
+ </div></div>
+ <aside class="notes"><b>Clave B:</b> hdisp=11,65 m · Q=39,26 L/s (141,3 m³/h) · T1: v=1,22 Re=1,23e5 f=0,0185 hL=1,86 (16%) · T2: v=2,11 Re=1,62e5 f=0,0182 hL=9,79 (84%). Globo ½: 35,81 L/s (−8,8%). ε=0,30: 33,67 L/s (−14,2%). Nota: la respuesta 28,5 L/s de la versión anterior no reproduce el enunciado original (el solver da ≈41–42 L/s con 5″/320 m); por eso el caso se rediseñó con velocidades realistas.</aside>
 </div>
+
+<!-- ============ 17 · PRÁCTICA C ============ -->
+<div class="slide-container light-bg dense" data-title="17 · Práctica C · Clase III y materiales">
+ <div class="bg-shape bg-shape-1"></div><div class="bg-shape bg-shape-2"></div>
+ <div class="slide-kicker">Práctica en parejas · Diseñar también es comparar materiales · Módulo 03 (+ 06)</div>
+ <h2 class="slide-title">Práctica C — Clase III: 85 L/s con Δp máximo de 115 kPa… ¿en acero o en PVC?</h2>
+ <div class="content-area"><div class="two-column wide-left" style="align-items:start">
+  <div>
+   <p>Línea horizontal de proceso (agua, 300 m) que debe entregar 85 L/s perdiendo máximo 115 kPa entre bridas. Dimensione y defienda la talla.</p>
+   <table class="data mini">
+    <tr><th style="width:30%">Campo</th><th>Digite esto</th></tr>
+    <tr><td>Módulo 03 · Acero</td><td>Fluido <span class="mono">Agua (20 °C)</span>. Q=<span class="mono">85 L/s</span> · p₁=<span class="mono">320 kPa</span> · p₂=<span class="mono">205 kPa</span> · z₁=z₂=<span class="mono">0</span> · h<sub>bomba</sub>=<span class="mono">0</span> · L=<span class="mono">300 m</span> · Material <span class="mono">Acero comercial</span> · Familia <span class="mono">Acero Sch 40</span>.</td></tr>
+    <tr><td>Accesorios</td><td>Deje solo: Entrada de borde agudo ×1 · Codo 90° estándar, bridado/soldado <strong>×6</strong> · Compuerta abierta, bridada ×2 · Check de columpio, bridado ×1 · Salida a depósito ×1. (ΣLe/D=296, ΣK<sub>dir</sub>=1,5.)</td></tr>
+    <tr><td>Segunda corrida · PVC</td><td>Cambie <strong>las dos cosas</strong>: Material → <span class="mono">PVC / CPVC (ε=0,0015 mm)</span> <em>y</em> Familia → <span class="mono">PVC-U PN16</span>. Nada más. Recalcule.</td></tr>
+   </table>
+  </div>
+  <div class="panel"><h4>Responda</h4>
+   <ol class="steps">
+    <li>En acero: h<sub>L,adm</sub>, D<sub>mín</sub>, talla escogida, su % de uso y su velocidad. Demuestre con la tabla de alternativas que la talla anterior <em>no</em> cumple.</li>
+    <li>En PVC: nuevo D<sub>mín</sub> y DN escogido. ¿Cuánto se movió D<sub>mín</sub> en % al bajar ε de 0,046 a 0,0015 mm (×30)? ¿Qué manda más: ε o D?</li>
+    <li><strong>Chequeo cruzado (Módulo 06):</strong> capacidad/diámetro económico con Q=85 L/s y servicio «línea de proceso»: ¿qué D sugiere la velocidad óptima (≈2 m/s)? Si su talla por pérdida da v≈2,6 m/s, ¿se queda con ella o sube una talla? Defienda con costo vs. energía.</li>
+   </ol>
+   <div class="callout info"><p><strong>Entregable:</strong> tabla Acero vs. PVC (D<sub>mín</sub>, talla, v, % uso) + su veredicto en 3 líneas.</p></div>
+  </div>
+ </div></div>
+ <aside class="notes"><b>Clave C:</b> hAdm=11,75 m. Acero: Dmín=196,8 mm → 8″ (hL=10,16; 86,5%; v=2,63); 6″ hL=39,12 falla. PVC: Dmín=187,9 mm (−4,5%) → DN 250 DI 204,6 (hL=7,85; 66,9%; v=2,59); DN 200 falla. D por velocidad 2 m/s = 232,6 mm: debate legítimo 8″ (pérdida) vs 10″/DN 315 (velocidad de proceso). El enunciado anterior omitía L, fluido y material: era irresoluble en la app.</aside>
+</div>
+
+<!-- ============ 18 · RESPUESTAS ============ -->
+<div class="slide-container light-bg dense" data-title="18 · Respuestas y autodiagnóstico">
+ <div class="bg-shape bg-shape-1"></div><div class="bg-shape bg-shape-2"></div>
+ <div class="slide-kicker">Autocorrección · Tolerancia esperada ±2 % si digitó lo indicado</div>
+ <h2 class="slide-title">Respuestas de las prácticas (revele solo tras entregar su intento)</h2>
+ <div class="content-area" style="justify-content:start;gap:12px">
+  <div class="panel answer" style="width:100%"><button class="reveal-btn" type="button">Mostrar respuesta A</button>
+   <div class="ans-body"><h4>A · Clase I multitramo</h4><p>Σh<sub>L</sub>=<strong>8,97 m</strong> (h<sub>f</sub> 6,50 + h<sub>m</sub> 2,48; succión 0,20 · descarga-1 4,10 · descarga-2 4,68) · estática+presión 35,82 m · <strong>h<sub>A</sub>=44,80 m</strong> · P<sub>h</sub>=10,96 · P<sub>freno</sub>=<strong>15,23</strong> · P<sub>eléct</sub>=16,92 · <strong>P con margen=18,61 kW</strong> · v = 1,34 / <span class="tag-warn">3,04 (sobre 3,0)</span> / 1,94 m/s · NPSH<sub>a</sub>≈11,41 m. El tramo de 4″ pierde ≈5× más por metro que el de 5″. Con Q×2: Σh<sub>L</sub>=34,63 m, P<sub>margen</sub>=58,54 kW, v<sub>4″</sub>=6,09 m/s → no viable sin rediseñar tubería.</p></div></div>
+  <div class="panel answer" style="width:100%"><button class="reveal-btn" type="button">Mostrar respuesta B</button>
+   <div class="ans-body"><h4>B · Clase II queroseno 8″→6″</h4><p>h<sub>disp</sub>=<strong>11,65 m</strong> → <strong>Q=39,26 L/s (141,3 m³/h)</strong>. Tramo 8″: v=1,22 m/s, f=0,0185, h<sub>L</sub>=1,86 m (16 %). Tramo 6″: v=2,11 m/s, f=0,0182, h<sub>L</sub>=9,79 m (84 %) — domina por D⁵ y por la globo (Le/D=340). Globo a ½: <strong>35,81 L/s (−8,8 %)</strong>. Incrustación ε=0,30 mm: <strong>33,67 L/s (−14,2 %)</strong>: en esta línea pesa más el envejecimiento que medio cierre de la globo.</p></div></div>
+  <div class="panel answer" style="width:100%"><button class="reveal-btn" type="button">Mostrar respuesta C</button>
+   <div class="ans-body"><h4>C · Clase III acero vs. PVC</h4><p>h<sub>L,adm</sub>=<strong>11,75 m</strong>. <strong>Acero:</strong> D<sub>mín</sub>=<strong>196,8 mm</strong> → <strong>8″ Sch 40</strong> (h<sub>L</sub>=10,16 m, 86,5 %, v=2,63 m/s); 6″ daría 39,12 m. <strong>PVC PN16:</strong> D<sub>mín</sub>=<strong>187,9 mm</strong> (solo −4,5 %) → <strong>DN 250</strong> (7,85 m, 66,9 %, v=2,59 m/s). Conclusión: ε ayuda, pero <strong>el diámetro manda</strong>; por velocidad óptima (D≈233 mm) la discusión 8″ vs. 10″ es de costo-energía, no de «cuentas».</p></div></div>
+  <div class="callout bad" style="width:100%"><p><strong>¿Desvió más del 2 %? Revise en este orden:</strong> ① fluido del panel lateral · ② p₂ en atm (Clase I) o Q en L/min vs L/s · ③ accesorio precargado de más (mire ΣLe/D y ΣK) · ④ DI digitado en vez de nominal · ⑤ accesorio inscrito en el tramo equivocado · ⑥ margen/η<sub>motor</sub> distintos. Corrija <em>una</em> cosa y recalcule.</p></div>
+ </div>
+ <aside class="notes"><b>Docente:</b> botón o tecla <b>R</b> revela/oculta las respuestas de la diapositiva activa. Al imprimir (tecla P / Ctrl+P) las respuestas salen visibles para el material del profesor.</aside>
+</div>
+
+<!-- ============ 19 · ACTIVIDAD FINAL · CASO ============ -->
+<div class="slide-container light-bg dense" data-title="19 · Actividad final · Caso Bogotá">
+ <div class="bg-shape bg-shape-1"></div><div class="bg-shape bg-shape-2"></div>
+ <div class="slide-kicker">Actividad final por equipos (3–4) · Integra Módulos 01 + 04</div>
+ <h2 class="slide-title">Caso real de auditoría: la bomba que «funcionaba en la costa» y cavita en Bogotá</h2>
+ <div class="content-area"><div class="two-column wide-left" style="align-items:start">
+  <div>
+   <p>Una línea debe entregar <strong>18 L/s de agua a 40 °C</strong> en Bogotá (≈2 600 m s. n. m.). La bomba, ubicada 1,5 m <em>sobre</em> el nivel del tanque, tiene NPSH<sub>r</sub>=3,2 m. En planta reportan ruido a «piedras» y picaduras: ¿es cavitación? Audite y proponga el arreglo.</p>
+   <table class="data mini">
+    <tr><th style="width:30%">Fase 0 · Panel lateral</th><td>Fluido <span class="mono">Agua (40 °C)</span> · <strong>p<sub>atm</sub>=<span class="mono">73.7 kPa</span></strong> (Bogotá; déjelo así en <em>todos</em> los módulos de esta actividad).</td></tr>
+    <tr><td>Fase 1 · Módulo 01 (base)</td><td>Q=<span class="mono">1080 L/min</span> · p₁=<span class="mono">0 kPa</span> · z₁=<span class="mono">-1.5 m</span> · p₂=<span class="mono">0</span> en <span class="mono">kPa</span> · z₂=<span class="mono">25 m</span> · z<sub>b</sub>=<span class="mono">0</span> · η<sub>b</sub>=<span class="mono">70 %</span> · η<sub>m</sub>=<span class="mono">90 %</span> · margen=<span class="mono">10 %</span>.<br><strong>Succión:</strong> L=<span class="mono">12 m</span>, <span class="mono">4″ Sch 40</span>: Válvula de pie con colador <strong>(disco)</strong> ×1 · Codo 90° radio largo, bridado ×2 · Compuerta abierta, bridada ×1.<br><strong>Descarga:</strong> L=<span class="mono">180 m</span>, <span class="mono">4″ Sch 40</span>: Check de columpio, bridado ×1 · Codo 90° estándar ×5 · Compuerta ×1 · Salida ×1.</td></tr>
+    <tr><td>Fase 2 · Módulo 04</td><td>NPSH<sub>r</sub>=<span class="mono">3.2 m</span> · FS=<span class="mono">1.1</span> · p<sub>tanque</sub>=<span class="mono">0 kPa</span> · Q=<span class="mono">18 L/s</span> · z<sub>a</sub>=<span class="mono">-1.5 m</span> · z<sub>b</sub>=<span class="mono">0</span> · L=<span class="mono">12 m</span> · <span class="mono">4″</span> (D=0,1023 m) · <em>los mismos accesorios de succión</em>.</td></tr>
+   </table>
+  </div>
+  <div class="panel"><h4>Su misión (25 min)</h4>
+   <ol class="steps">
+    <li><strong>Reproduzca la base</strong> y reporte: h<sub>A</sub>, P con margen, v<sub>suc</sub>/v<sub>des</sub>, NPSH<sub>a</sub> de Clase I y el del Módulo 04 (deben coincidir). Veredicto: ¿NPSH<sub>a</sub> ≥ 3,2×1,1?</li>
+    <li><strong>Diagnostique con números:</strong> ¿cuánto aporta cada término del NPSH<sub>a</sub> (p<sub>atm</sub>/γ, z<sub>a</sub>−z<sub>b</sub>, h<sub>L,suc</sub>, p<sub>v</sub>/γ)? ¿Qué pasaría con p<sub>atm</sub>=101,325 kPa? (hágalo y regrese a 73,7).</li>
+    <li><strong>Proponga y cuantifique</strong> la mejora obligatoria «succión a 5″» (Módulos 01 y 04) <em>más una libre</em>: válvula de pie (bisagra), bajar la bomba z<sub>b</sub>=−1,2 m, subir el nivel o presurizar (use las propuestas automáticas del Módulo 04 como punto de partida, no como respuesta).</li>
+    <li><strong>Recomiende</strong> una sola intervención ponderando NPSH, velocidad de succión, Δpotencia y tipo de obra. Energía anual: 6 000 h/año; tarifa supuesta 700 COP/kWh sobre P<sub>eléctrica</sub> sin margen.</li>
+   </ol>
+  </div>
+ </div></div>
+ <aside class="notes"><b>Clave final (base):</b> ΣhL=11,28 (suc 2,35 + des 8,93) · hA=37,78 m · Ph=6,62 Pf=9,45 Pe=10,50 Pdes=11,55 kW · v=2,19/2,19 · NPSHa=2,97 m &lt; 3,52 → cavitación probable; Qmáx admisible≈15,7 L/s. A nivel del mar NPSHa=5,81 m (pasaría). Mejoras: suc 5″ → NPSHa=4,45, vsuc=1,39, Pe=10,09 (ahorro ≈2 460 kWh/año ≈ $1,72 M COP/año con la tarifa supuesta). Válvula bisagra → 4,35 m pero vsuc sigue 2,19. Bajar bomba a −1,2 → 4,17 m sin ahorrar energía. La mejor integral es la succión de 5″.</aside>
+</div>
+
+<!-- ============ 20 · ACTIVIDAD FINAL · ENTREGA ============ -->
+<div class="slide-container light-bg dense" data-title="20 · Actividad final · Entrega y rúbrica">
+ <div class="bg-shape bg-shape-1"></div><div class="bg-shape bg-shape-2"></div>
+ <div class="slide-kicker">Actividad final · Qué entregar y cómo se califica</div>
+ <h2 class="slide-title">Entrega: una tabla, un CSV y una recomendación (nada de «pantallazos sueltos»)</h2>
+ <div class="content-area"><div class="two-column wide-left" style="align-items:start">
+  <div>
+   <table class="data mini"><tr><th>Complete esta tabla con la app</th><th class="num">Base (4″)</th><th class="num">Su propuesta</th></tr>
+   <tr><td>h<sub>A</sub> (m) · P eléctrica con margen (kW)</td><td class="num">—</td><td class="num">—</td></tr>
+   <tr><td>NPSH<sub>a</sub> (m) y margen vs. 3,52 m</td><td class="num">—</td><td class="num">—</td></tr>
+   <tr><td>v succión / descarga (m/s) y juicio</td><td class="num">—</td><td class="num">—</td></tr>
+   <tr><td>Consumo anual (kWh/año y COP/año)</td><td class="num">—</td><td class="num">—</td></tr></table>
+   <div class="callout good"><p><strong>Adjuntos obligatorios:</strong> ① CSV exportado del Módulo 01 de la base y de su propuesta (botón «Exportar CSV») — así su cálculo es reproducible. ② Captura del veredicto del Módulo 04. ③ Recomendación en <strong>máximo 4 líneas</strong>: qué cambiar, cuánto NPSH gana, cuánto ahorra (o cuesta) al año y qué riesgo residual queda.</p></div>
+   <div class="callout warn"><p><strong>Cierre de la actividad:</strong> regrese el panel lateral a Agua (20 °C) y p<sub>atm</sub>=101,325 kPa. Dejar la app «como la encontró» también es práctica profesional.</p></div>
+  </div>
+  <div class="panel dark"><h4>Rúbrica (100 pts)</h4>
+   <ul class="tight" style="color:#eaf2fb">
+    <li><strong>30 · Reproducción fiel:</strong> base coincide (±2 %) y CSV corresponden a lo digitado.</li>
+    <li><strong>25 · Diagnóstico:</strong> descompone el NPSH<sub>a</sub> y explica el efecto Bogotá con números.</li>
+    <li><strong>30 · Mejora cuantificada:</strong> recalcula en 01+04; cumple NPSH <em>y</em> velocidad de succión.</li>
+    <li><strong>15 · Juicio:</strong> pondera obra/costo/energía y declara supuestos (tarifa, horas).</li>
+   </ul>
+   <p style="font-size:14px;color:#bfe6d8">Penalización típica: recomendar «una bomba más grande» para un problema de NPSH<sub>a</sub> (la bomba no crea presión atmosférica).</p>
+  </div>
+ </div></div>
+</div>
+
+<!-- ============ 21 · CIERRE / CUESTIONARIO ============ -->
+<div class="slide-container dark-bg" data-title="21 · Cierre y cuestionario rápido">
+ <div class="bg-shape bg-shape-1"></div><div class="bg-shape bg-shape-2"></div>
+ <div class="qa-layout"><h2>Cuestionario rápido de cierre</h2>
+ <p><strong class="accent">1.</strong> ¿Por qué Clase II y III exigen iterar y Clase I no? Formúlelo en términos de «qué se conoce de v al arrancar» y de la función F(Q) o h<sub>L</sub>(D) que la app anula.</p>
+ <p><strong class="accent">2 · Verifíquelo en la app (1 min):</strong> en el Guiado I cambie solo la descarga de 6″ a 3″ con el mismo Q. Prediga antes de calcular: ¿por qué factor crece la fricción? ¿Qué obtuvo? ¿Qué ley de escala (≈D<sup>−5</sup>) lo explica y por qué el factor no es exacto?</p>
+ <p><strong class="accent">3.</strong> Su sistema «cumple» en Clase III (h<sub>L</sub> ≤ h<sub>adm</sub>) pero cavita en Bogotá. ¿Qué dos chequeos fuera del Módulo 03 lo revelan y qué variable de diseño los conecta?</p>
+ <p style="color:var(--verde);font-weight:700;font-size:24px;text-align:center;margin-top:26px">Espacio para debate abierto y resolución de dudas</p>
+ </div>
+ <aside class="notes"><b>Respuestas orientadoras:</b> (1) En I, v sale de Q/A; en II v está dentro de hL(Q) y en III D está en v, Re, f y K a la vez. (2) Solo fricción en descarga: 7,85 m (6″) → ≈257 m (3″), ×33 ≈ 2⁵; no exacto porque f cambia con Re y ε/D. (3) NPSH (Mód. 04) y velocidad de succión; los conecta el diámetro/nivel de succión. Cierre recordando la práctica-tarea pendiente.</aside>
+</div>
+
+<!-- ============ 22 · BIBLIOGRAFÍA ============ -->
+<div class="slide-container light-bg dense" data-title="22 · Bibliografía y recursos">
+ <div class="bg-shape bg-shape-1"></div><div class="bg-shape bg-shape-2"></div>
+ <div class="slide-kicker">Para profundizar y para citar correctamente</div>
+ <h2 class="slide-title" style="text-align:center">Bibliografía y recursos adicionales</h2>
+ <div class="content-area"><div class="bullet-list">
+  <ul>
+   <li><i class="fa-solid fa-book"></i><strong>Texto guía del curso:</strong><span style="display:block;margin-top:6px;font-size:17px">Sandoval, J. (Ed.). (2018). <em>Mecánica de fluidos</em> (Serie Apuntes de Clase). Publicaciones Universidad de América. <a href="https://doi.org/10.29097/9789588517360" target="_blank" rel="noopener">https://doi.org/10.29097/9789588517360</a> · Véase también Sandoval (Ed., 2021), <em>Balances de materia y energía aplicados a la investigación</em>, <a href="https://doi.org/10.29097/9789585303058" target="_blank" rel="noopener">doi.org/10.29097/9789585303058</a>.</span></li>
+   <li><i class="fa-solid fa-book-open"></i><strong>Fuentes del modelo implementado en la app:</strong><span style="display:block;margin-top:6px;font-size:16px">Mott &amp; Untener (2015). <em>Applied Fluid Mechanics</em> (7.ª ed.). Pearson. · White (2016). <em>Fluid Mechanics</em> (8.ª ed.). McGraw-Hill. · Çengel &amp; Cimbala (2018). <em>Fluid Mechanics: Fundamentals and Applications</em> (4.ª ed.). McGraw-Hill. · Crane Co. (1988). <em>Flow of Fluids Through Valves, Fittings, and Pipe</em> (TP-410) — método L<sub>e</sub>/D. · ASME B36.10M — dimensiones Sch 40/80. La lista completa y normativa está en la sección «Bibliografía» de la calculadora.</span></li>
+   <li><i class="fa-brands fa-youtube" style="color:#c00"></i><strong>Videos de apoyo (hoja de cálculo y método manual):</strong>
+    <span style="display:block;margin-top:6px;font-size:16px">▸ <a href="https://youtu.be/8Vl7P6CdfKA?si=mU688_sdGFzko09z" target="_blank" rel="noopener">Sistema en serie Clase II con hoja de cálculo</a> · ▸ <a href="https://youtu.be/nJCNb6bRNf4?si=UQDq3GwFL7WNYfdK" target="_blank" rel="noopener">Ejercicio de sistemas en serie Clase II</a> · ▸ <a href="https://youtu.be/6o9MjOjmBR8?si=EqJngzjhbAYJLmIT" target="_blank" rel="noopener">Sistemas de tubería en serie Clase III</a>. Úselos para el método; valide los números en la app v2.0.</span></li>
+   <li><i class="fa-solid fa-laptop-code"></i><strong>Calculadora del curso:</strong><span style="display:block;margin-top:6px;font-size:17px">Sandoval Herrera, J. (2026). <em>Hidráulica de Tuberías en Serie · Calculadora Integral</em> (v2.0) [aplicación web]. <a href="https://juansanher25.github.io/tuberiasybombas/" target="_blank" rel="noopener">https://juansanher25.github.io/tuberiasybombas/</a></span></li>
+  </ul>
+ </div></div>
+ <div class="foot" style="text-align:center">Atajos de esta presentación: ← → / Espacio navegar · O índice · N notas del docente · R revelar respuestas · F pantalla completa · P imprimir (handout con respuestas).</div>
+</div>
+
+<!-- CONTROLES -->
+<div class="presentation-controls" role="navigation" aria-label="Controles de la presentación">
+ <button type="button" onclick="toggleOverview()" title="Índice (O)" aria-label="Índice"><i class="fa-solid fa-grip"></i></button>
+ <button type="button" onclick="prevSlide()" title="Anterior (←)" aria-label="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+ <span class="counter" id="slide-counter">1 / 22</span>
+ <button type="button" onclick="nextSlide()" title="Siguiente (→ o Espacio)" aria-label="Siguiente"><i class="fa-solid fa-chevron-right"></i></button>
+ <button type="button" onclick="toggleNotes()" title="Notas del docente (N)" aria-label="Notas"><i class="fa-regular fa-note-sticky"></i></button>
+ <button type="button" onclick="toggleFullscreen()" title="Pantalla completa (F)" aria-label="Pantalla completa"><i class="fa-solid fa-expand"></i></button>
+</div>
+<div id="notesPanel" role="complementary" aria-label="Notas del docente"></div>
+<div id="overview" role="dialog" aria-label="Índice de diapositivas"><h3>Índice — clic para saltar (Esc u O para cerrar)</h3><div class="ov-grid" id="ovGrid"></div></div>
 
 <script>
-    let currentSlide = 0;
-    const slides = document.querySelectorAll('.slide-container');
-    const counter = document.getElementById('slide-counter');
-
-    function showSlide(index) {
-        if (index >= slides.length) currentSlide = slides.length - 1;
-        if (index < 0) currentSlide = 0;
-
-        slides.forEach(slide => slide.classList.remove('active'));
-        slides[currentSlide].classList.add('active');
-        counter.textContent = `${currentSlide + 1} / ${slides.length}`;
-    }
-
-    function nextSlide() {
-        if (currentSlide < slides.length - 1) {
-            currentSlide++;
-            showSlide(currentSlide);
-        }
-    }
-
-    function prevSlide() {
-        if (currentSlide > 0) {
-            currentSlide--;
-            showSlide(currentSlide);
-        }
-    }
-
-    // Navegación por teclado
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowRight' || e.key === ' ') {
-            nextSlide();
-            if(e.key === ' ') e.preventDefault(); // Evitar scroll con espacio
-        } else if (e.key === 'ArrowLeft') {
-            prevSlide();
-        }
-    });
-
-    // Iniciar presentación
-    showSlide(currentSlide);
+let currentSlide=0;
+const slides=document.querySelectorAll('.slide-container');
+const counter=document.getElementById('slide-counter');
+const progress=document.getElementById('progress');
+const notesPanel=document.getElementById('notesPanel');
+const overview=document.getElementById('overview');
+function fit(){const s=Math.min(window.innerWidth/1280,window.innerHeight/720);document.documentElement.style.setProperty('--s',s);}
+function refreshNotes(){const n=slides[currentSlide].querySelector('.notes');notesPanel.innerHTML=n?n.innerHTML:'<b>Notas del docente:</b> sin notas adicionales en esta diapositiva.';}
+function showSlide(index){
+ currentSlide=Math.max(0,Math.min(index,slides.length-1));
+ slides.forEach(s=>s.classList.remove('active'));
+ slides[currentSlide].classList.add('active');
+ counter.textContent=(currentSlide+1)+' / '+slides.length;
+ progress.style.width=((currentSlide+1)/slides.length*100)+'%';
+ document.title=slides[currentSlide].dataset.title+' · Tuberías en serie';
+ refreshNotes();
+}
+function nextSlide(){if(currentSlide<slides.length-1)showSlide(currentSlide+1);}
+function prevSlide(){if(currentSlide>0)showSlide(currentSlide-1);}
+function toggleFullscreen(){if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();}
+function toggleNotes(){notesPanel.classList.toggle('show');refreshNotes();}
+function buildOverview(){const g=document.getElementById('ovGrid');g.innerHTML='';slides.forEach((s,i)=>{const b=document.createElement('button');b.type='button';b.textContent=s.dataset.title||('Diapositiva '+(i+1));if(i===currentSlide)b.classList.add('cur');b.onclick=()=>{overview.classList.remove('show');showSlide(i);};g.appendChild(b);});}
+function toggleOverview(){buildOverview();overview.classList.toggle('show');}
+document.querySelectorAll('.reveal-btn').forEach(btn=>{btn.addEventListener('click',e=>{e.stopPropagation();const box=btn.closest('.answer');box.classList.toggle('shown');btn.textContent=box.classList.contains('shown')?btn.textContent.replace('Mostrar','Ocultar'):btn.textContent.replace('Ocultar','Mostrar');});});
+function toggleAnswersInSlide(){const boxes=slides[currentSlide].querySelectorAll('.answer');if(!boxes.length)return;const anyHidden=[...boxes].some(b=>!b.classList.contains('shown'));boxes.forEach(b=>{b.classList.toggle('shown',anyHidden);const btn=b.querySelector('.reveal-btn');if(btn)btn.textContent=btn.textContent.replace(anyHidden?'Mostrar':'Ocultar',anyHidden?'Ocultar':'Mostrar');});}
+document.addEventListener('keydown',e=>{
+ if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){nextSlide();if(e.key===' ')e.preventDefault();}
+ else if(e.key==='ArrowLeft'||e.key==='PageUp'){prevSlide();}
+ else if(e.key==='Home'){showSlide(0);} else if(e.key==='End'){showSlide(slides.length-1);}
+ else if(e.key==='Escape'){overview.classList.remove('show');notesPanel.classList.remove('show');}
+ else if(e.key.toLowerCase()==='o'){toggleOverview();}
+ else if(e.key.toLowerCase()==='n'){toggleNotes();}
+ else if(e.key.toLowerCase()==='f'){toggleFullscreen();}
+ else if(e.key.toLowerCase()==='r'){toggleAnswersInSlide();}
+ else if(e.key.toLowerCase()==='p'){window.print();}
+});
+let touchX=null;
+document.addEventListener('touchstart',e=>{touchX=e.changedTouches[0].clientX;},{passive:true});
+document.addEventListener('touchend',e=>{if(touchX===null)return;const dx=e.changedTouches[0].clientX-touchX;if(dx<-60)nextSlide();else if(dx>60)prevSlide();touchX=null;},{passive:true});
+window.addEventListener('resize',fit);
+fit();showSlide(0);
 </script>
-
 </body>
 </html>
